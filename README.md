@@ -1,19 +1,18 @@
 # ProyectoClaustroDAW
 
-Proyecto Fin de ciclo DAW
+**Proyecto Fin de ciclo DAW**
 
-IES San Clemente
+**IES San Clemente**
 
 Participantes:
 
-Jose Luis Rego Rodríguez
+	Jose Luis Rego Rodríguez
 
-Óscar Fuentes Maña
+	Óscar Fuentes Maña
 
 Tutor:
 
-Rafael Veiga Cid
-
+	Rafael Veiga Cid
 
 Proyecto Claustro, parte web del proyecto. 
 
