@@ -1,0 +1,32 @@
+#historico{
+	/*visibility: hidden;*/
+}
+#historicoIzquierda{
+	background-color: red;
+	display: block;
+}
+#historicoDerecha{
+	background-color: green;
+	display: block;
+}
+#nuevoIzquierda{
+	width: 70%;
+	background-color: red;
+}
+#nuevoDerecha{
+	width: 70%;
+	background-color: green;
+}
+#niz{
+	  display: inline-block;
+	background-color: red;
+}
+#ndr{
+	background-color: green;
+}
+#hiz{
+	background-color: blue;
+}
+#hdr{
+	background-color: yellow;
+}
