@@ -1,12 +1,5 @@
 <?php
-/* Constantes para la conexión LDAP ACTIVE DIRECTORY */
-define ('_LDAP_PORT_', 65500);
-define ('_LDAP_HOST_', '193.144.43.241');
-define ('_LDAP_PRDN_', 'CN=adminweb,OU=Especiais,OU=SC-Usuarios,DC=sanclemente,DC=local');
-define ('_LDAP_PASS_', 'abc123-.,');
-define ('_LDAP_BASE_DN_', 'DC=sanclemente,DC=local');
-define ('_LDAP_DN_', 'CN=adminweb,OU=Especiais,OU=SC-Usuarios,DC=sanclemente,DC=local');
-
+require("datos.php");
 /**
  * Búsqueda iterativa sobre grupos de usuario para determinar si un usuario pertenece, o no
  * a dicho grupo.

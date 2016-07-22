@@ -1,12 +1,13 @@
 <?php
+require("datos.php");
 echo "<h3>Consulta de prueba LDAP</h3>";
 
-$ds = ldap_connect('193.144.43.241',65500) or die("Could not connect to $ds");
+$ds = ldap_connect(_LDAP_HOST_, _LDAP_PORT_) or die("Could not connect to $ds");
 echo "El resultado de la conexión es " . $ds . "<br />";
 
 if ($ds) { 
     echo "Vinculando ..."; 
-    $r=ldap_bind($ds,'adminweb','abc123-.,');   
+    $r=ldap_bind($ds,_LDAP_PRDN_, _LDAP_PASS_);   
                            // 
     echo "El resultado de la vinculación es " . $r . "<br />";
 
