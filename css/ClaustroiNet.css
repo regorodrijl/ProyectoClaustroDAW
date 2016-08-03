@@ -9,19 +9,13 @@
 	background-color: green;
 	display: block;
 }
-#nuevoIzquierda{
-	width: 70%;
-	background-color: red;
-}
-#nuevoDerecha{
-	width: 70%;
-	background-color: green;
-}
 #niz{
-	  display: inline-block;
+	
 	background-color: red;
 }
-#ndr{
+#nuevo{
+	width: 100%;
+	height: 100%;
 	background-color: green;
 }
 #hiz{

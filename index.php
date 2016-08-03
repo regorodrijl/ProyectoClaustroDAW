@@ -1,5 +1,11 @@
 <?php 
-//require("./librerias/busca.php");
+error_reporting(E_ALL);
+require("./librerias/ldap/class.ldap.php");
+
+$ldap = new ldap(Config::$ldapServidor);
+//print_r($ldap->getProfes());
+$result = $ldap->getProfes();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,6 +16,7 @@
   <link rel="icon" href="../../favicon.ico">
   <link rel="stylesheet" type="text/css" href="css/ClaustroiNet.css">
   <title>ClaustroiNet</title>
+
   <!-- jQuery CDN versión 2.2.4 ya que bootstrap no sopeorta la 3 -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
   <!-- Latest compiled and minified CSS -->
@@ -21,6 +28,15 @@
   <!-- Latest compiled and minified JavaScript -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
   
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css">
+
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
+
+
+
 </head>
 <body>
 
@@ -32,63 +48,77 @@
   </div>
   <div class="container" >
     <div class="row" align="center">
-      <div class="col-md-6">
+      <div class="col-md-4">
         <button id="btnNuevo" type="button">Nuevo Claustro</button>
       </div>
-      <div class="col-md-6">
+      <div class="col-md-4">
         <button id="btnHistorico" type="button">Histórico de Claustro</button>
+      </div>
+      <div class="col-md-4">
+        <button id="btnProfes" type="button">Actualizar Profesores</button>
       </div>
     </div>
     <br>
 
     <div class="row" id="nuevo">
-     <div class="col-xs-12 col-sm-6 col-md-8" id="niz" >
+      <div>
+       <div class="" id="niz" >
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-2 control-label">Título Claustro:</label>
+            <div class="col-sm-4">
+              <input name="titulo" type="text" id="tituloClaustro" size="50" placeholder="Escriba un título para el Clautro." />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label">Día:</label>
+            <div class="col-sm-4">
+              <input name="fecha" type="date" id="fecha" value="<?php echo date('Y-m-d'); ?>" />
+            </div>
+            <label class="col-sm-2 control-label">Curso:</label>
+            <div class="col-sm-4">
+              <input name="curso" type="text" id="curso" placeholder="Nombre del curso." />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label">Hora Inicio:</label>
+            <div class="col-sm-4">
+              <input type="time" name="fecha" id="horaInicio" value="<?php echo date('H:i'); ?>">
+            </div>
+            <label class="col-sm-2 control-label">Hora Fin:</label>
+            <div class="col-sm-4">
+              <input type="time" name="fecha" id="horaFin" value="<?php echo date('H:i'); ?>">
+            </div>
+          </div>
+        </form>
+        <br>
+        <label>Orden del día:</label>
+        <textarea id="orden" class="form-control" rows="4" placeholder="Escriba la orden del día."></textarea>
+        <label>Observaciones:</label>
+        <textarea id="observacion" class="form-control" rows="4" placeholder="Alguna observación?"></textarea>
+      </div>
+      <select class="selectpicker" multiple id="selecProfe" data-live-search="true" title="Seleccione Profesor">  
+        <?php    
+        $result = $ldap->getProfes();
 
-      <form class="form-horizontal">
-        <div class="form-group">
-          <label class="col-sm-2 control-label">Día:</label>
-          <div class="col-sm-4">
-            <input name="fecha" type="date" id="fecha" value="<?php echo date('Y-m-d'); ?>" />
-          </div>
-          <label class="col-sm-2 control-label">Curso:</label>
-          <div class="col-sm-4">
-            <input name="curso" type="text" id="curso" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="col-sm-2 control-label">Hora Inicio:</label>
-          <div class="col-sm-4">
-            <input type="time" name="fecha" id="horaInicio" value="<?php echo date('H:i'); ?>">
-          </div>
-          <label class="col-sm-2 control-label">Hora Fin:</label>
-          <div class="col-sm-4">
-            <input type="time" name="fecha" id="horaFin" value="<?php echo date('H:i'); ?>">
-          </div>
-        </div>
-      </form>
-      <br>
-      <label>Orden del día:</label>
-      <textarea class="form-control" rows="4" placeholder="Escriba la orden del día."></textarea>
-      <label>Observaciones:</label>
-      <textarea class="form-control" rows="2" placeholder="Alguna observación?"></textarea>
-    </form>
-  </div>
+        foreach ($result as  $key) {
+          ?>
+          <option value=" <?php  echo $key['apellidos'] ?> " >
+            <?php  echo $key['apellidos'] ?>
+          </option> 
+          <?php
+        }    
+        ?> 
+      </select>
+      <div id="seleccion"></div>
+    </div>
+    <div>
+     <button id="crearClaustro" class=".col-md-3 .col-md-offset-3 center-block">Crear Claustro</button>
+   </div>
+ </div>
 
-  <div class="col-xs-6 col-md-4" id="ndr">
-   <select id="historicoSelect">
-     <option value="" disabled selected>Seleccione Profesor</option>
-     <option value="volvo"></option>
-   </select>
-   <br>
-   <label>Profesores seleccionados:</label>
-   <textarea class="form-control" rows="2" placeholder="Seleccione algún profesor para que aparezca aquí."></textarea>
- </div>
- <div>
-   <button>Crear Claustro</button>
- </div>
-</div>
-<br> 
-<div class="row" id="historico">
+ <br> 
+ <div class="row" id="historico">
   <div class="col-xs-6 col-md-4" id="hiz" >
 
     <label>Listado de Claustros ordenado por:</label>
@@ -120,25 +150,90 @@
 </div>
 <script type="text/javascript">
   $(document).ready(function(){
-   // $("#nuevo").hide();
-   // $("#historico").hide();
-
-   $("#btnNuevo").click(function(){
-     $("#titulo").hide();
-     $("#nuevo").show();
-     $("#historico").hide();
-
-   });
-   $("#btnHistorico").click(function(){
-    $("#titulo").hide();
+    $("#historico").hide();
     $("#nuevo").hide();
-    $("#historico").show();
+    // NUEVO
+    $("#btnNuevo").click(function(){
+      $("#titulo").hide();
+      $("#nuevo").show();
+      $("#historico").hide();
+      console.log("dentro");
+      $("#selecProfe").change(function () {
+        var str = "PROFESORES SELECCIONADOS:<br>";
+        $( "select option:selected" ).each(function() {
+          str += $( this ).text() + "<br>";
+        });
+        $( "#seleccion" ).html("<div>"+str+"</div>");
+      }).change();
+    });
+    //HISTORICO
+    $("#btnHistorico").click(function(){
+      $("#titulo").hide();
+      $("#nuevo").hide();
+      $("#historico").show();
+    });// fin historico
+    // ACTUALIZAR
+    $("#btnProfes").click(function(){
+      var datos =  '<?php echo json_encode($result); ?>';
+      datos=JSON.parse(datos);
+      console.log(typeof(datos));
+      alert("Se han actualizado correctamente!");
+      $.ajax({
+        url: "./librerias/php/funciones.php",
+        type: 'post',
+        dataType: 'json',
+        success: function (data) {
+          if(data=="ok"){
+            console.log("insertado");
+          }{console.log("MAL");}
+        },
+        data: {datos:datos}
+      });
+    });// fin Botón Atualizar Profes
+    // CREAR CLAUSTRO
+    $("#crearClaustro").click(function(){
 
+      console.log("titulo",$("#tituloClaustro").val());
+      console.log("dia",$("#fecha").val());
+      console.log("horaInicio",$("#horaInicio").val());
+      console.log("horaFin",$("#horaFin").val());
+      console.log("curso",$("#curso").val());
+      console.log("orden",$("#orden").val());
+      console.log("observacion",$("#observacion").val());
+      var profes=[];
+      $("#selecProfe option:selected").each(function() {
+        profes.push($(this).val());
+      });
+      console.log("PROFESORES",profes);
+
+      var claustro={
+        "titulo":$("#tituloClaustro").val(),
+        "dia": $("#fecha").val(),
+        "horaInicio":$("#horaInicio").val(),
+        "horaFin":$("#horaFin").val(),
+        "curso":$("#curso").val(),
+        "orden":$("#orden").val(),
+        "observacion":$("#observacion").val(),
+        "profesores":profes};
+       // console.log(claustro.profesores);
+       $.ajax({
+        url: "./librerias/php/funciones.php",
+        type: 'post',
+        dataType: 'json',
+        success: function (data) {
+          console.log("DATOSSS   ",data);
+          if(data=="ok"){
+            console.log("insertado");
+          }else{console.log("MAL");}
+        },
+        data: {claustro:claustro}
+      }).done(function(data){
+        console.log("realizado! "+data);
+      });
+
+    });//fin botón CrearClaustro
   });
 
- });
 </script>
-
-
 </body>
 </html>
