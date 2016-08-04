@@ -67,7 +67,7 @@ $result = $ldap->getProfes();
           <div class="form-group">
             <label class="col-sm-2 control-label">Título Claustro:</label>
             <div class="col-sm-4">
-              <input name="titulo" type="text" id="tituloClaustro" size="50" placeholder="Escriba un título para el Clautro." />
+            <input name="titulo" type="text" id="tituloClaustro" size="50" placeholder="Escriba un título para el Claustro." />
             </div>
           </div>
           <div class="form-group">
@@ -77,7 +77,7 @@ $result = $ldap->getProfes();
             </div>
             <label class="col-sm-2 control-label">Curso:</label>
             <div class="col-sm-4">
-              <input name="curso" type="text" id="curso" placeholder="Nombre del curso." />
+              <input name="curso" type="text" id="curso" placeholder="Curso: 2015-2016" />
             </div>
           </div>
           <div class="form-group">
@@ -208,6 +208,9 @@ $result = $ldap->getProfes();
       // console.log(claustro.profesores);
       $.post("./librerias/php/funciones.php", {claustro:claustro},function (respuesta) {
         console.log(respuesta);
+        if(respuesta=="ok"){
+          alert("Creado correctamente!");
+        }else alert("Error al crear un claustro!");
       },'json');
        /*
        $.ajax({
