@@ -67,7 +67,7 @@ $result = $ldap->getProfes();
           <div class="form-group">
             <label class="col-sm-2 control-label">Título Claustro:</label>
             <div class="col-sm-4">
-            <input name="titulo" type="text" id="tituloClaustro" size="50" placeholder="Escriba un título para el Claustro." />
+              <input name="titulo" type="text" id="tituloClaustro" size="50" placeholder="Escriba un título para el Claustro." />
             </div>
           </div>
           <div class="form-group">
@@ -182,12 +182,14 @@ $result = $ldap->getProfes();
         url: "./librerias/php/funciones.php",
         type: 'post',
         dataType: 'json',
-        success: function (data) {
-          if(data=="ok"){
-            console.log("insertado");
-          }{console.log("MAL");}
-        },
-        data: {datos:datos}
+        data: {datos:datos},          
+        success:function(respuesta){
+          if(respuesta=="ok"){
+            alert("Profesores actualizados correctamente!!");
+          }else alert("Error al actualizar!");
+        }
+      }).fail( function() {
+        alert("Error al actualizar!");
       });
     });// fin Botón Atualizar Profes
     // CREAR CLAUSTRO
@@ -205,24 +207,19 @@ $result = $ldap->getProfes();
         "orden":$("#orden").val(),
         "observacion":$("#observacion").val(),
         "profesores":profes};
-      // console.log(claustro.profesores);
-      $.post("./librerias/php/funciones.php", {claustro:claustro},function (respuesta) {
-        console.log(respuesta);
-        if(respuesta=="ok"){
-          alert("Creado correctamente!");
-        }else alert("Error al crear un claustro!");
-      },'json');
-       /*
-       $.ajax({
-        url: "./librerias/php/funciones.php",
-        type: 'post',
-        dataType: 'json',
-        data: {claustro:claustro},
-        success: function (resultado) {
-          console.log("DATOSSS   ",resultado);
-          alert("bien");
-        }
-      });*/
+        $.ajax({
+          url: "./librerias/php/funciones.php",
+          type: 'post',
+          dataType: 'json',
+          data: {claustro:claustro},
+          success:function(respuesta){
+            if(respuesta=="ok"){
+              alert("Creado correctamente!");
+            }else alert("Error al crear un claustro!");
+          }
+        }).fail( function() {
+          alert("Error al crear un claustro!");
+        });
 
     });//fin botón CrearClaustro
   });

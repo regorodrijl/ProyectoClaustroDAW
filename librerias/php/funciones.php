@@ -14,12 +14,10 @@ if (!empty($_POST['datos'])){
 			$stmt->bindParam(':email', $key['email']);
 			$stmt->execute();
 		}    
-		
-
 		if($stmt->execute()){
-			echo "ok";
+			echo json_encode("ok");
 		}else{
-			echo "ko";
+			echo json_encode("ko");
 		}
 	}
 	catch(PDOException $e) {
@@ -41,11 +39,9 @@ if (!empty($_POST['datos'])){
 			$stmt->execute();
 
 			if($stmt ==false){
-				echo "ko";
-				print_r($pdo->errorinfo());
+				echo json_encode("ko,".$pdo->errorinfo());
 			}else {
 				// si fue ok, debemos buscar los id de los profes y luego crear firma para cada uno con el id del clautro.
-				echo "ok";
 				// ultimo id insertado en claustro.
 				$lastId = $pdo->lastInsertId(); 
 				
@@ -77,9 +73,9 @@ if (!empty($_POST['datos'])){
 					$stmt->bindParam(':idProfesor', $key["id"]);
 					
 					if($stmt->execute()){
-						echo "ok";
+						echo json_encode("ok");
 					}else{
-						echo "ko";
+						echo json_encode("ko");
 					}
 				}
 			}
