@@ -192,20 +192,10 @@ $result = $ldap->getProfes();
     });// fin Botón Atualizar Profes
     // CREAR CLAUSTRO
     $("#crearClaustro").click(function(){
-
-      console.log("titulo",$("#tituloClaustro").val());
-      console.log("dia",$("#fecha").val());
-      console.log("horaInicio",$("#horaInicio").val());
-      console.log("horaFin",$("#horaFin").val());
-      console.log("curso",$("#curso").val());
-      console.log("orden",$("#orden").val());
-      console.log("observacion",$("#observacion").val());
       var profes=[];
       $("#selecProfe option:selected").each(function() {
         profes.push($(this).val());
       });
-      console.log("PROFESORES",profes);
-
       var claustro={
         "titulo":$("#tituloClaustro").val(),
         "dia": $("#fecha").val(),
@@ -215,21 +205,21 @@ $result = $ldap->getProfes();
         "orden":$("#orden").val(),
         "observacion":$("#observacion").val(),
         "profesores":profes};
-       // console.log(claustro.profesores);
+      // console.log(claustro.profesores);
+      $.post("./librerias/php/funciones.php", {claustro:claustro},function (respuesta) {
+        console.log(respuesta);
+      },'json');
+       /*
        $.ajax({
         url: "./librerias/php/funciones.php",
         type: 'post',
         dataType: 'json',
-        success: function (data) {
-          console.log("DATOSSS   ",data);
-          if(data=="ok"){
-            console.log("insertado");
-          }else{console.log("MAL");}
-        },
-        data: {claustro:claustro}
-      }).done(function(data){
-        console.log("realizado! "+data);
-      });
+        data: {claustro:claustro},
+        success: function (resultado) {
+          console.log("DATOSSS   ",resultado);
+          alert("bien");
+        }
+      });*/
 
     });//fin botón CrearClaustro
   });
