@@ -175,8 +175,10 @@ $result = $ldap->getProfes();
           $("#historicoClaustros").html(tabla);
           // hacemos clickeable
           $("#tabla tr td").click(function(){
+            $(this).parent("tr").removeClass("color");
             var x = $(this).parent("tr");
             console.log("attr",x.attr('id'));
+            x.addClass("color");
             //x.css("background-color","red");
             $.ajax({
               url: "./librerias/php/funciones.php",

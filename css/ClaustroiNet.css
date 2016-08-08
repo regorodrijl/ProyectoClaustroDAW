@@ -1,16 +1,7 @@
-#historico{
-	/*visibility: hidden;*/
-}
-#historicoIzquierda{
+.color{
 	background-color: red;
-	display: block;
-}
-#historicoDerecha{
-	background-color: green;
-	display: block;
 }
 #niz{
-	
 	background-color: red;
 }
 #nuevo{
