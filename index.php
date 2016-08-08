@@ -49,13 +49,13 @@ $result = $ldap->getProfes();
   <div class="container" >
     <div class="row" align="center">
       <div class="col-md-4">
-        <button id="btnNuevo" type="button">Nuevo Claustro</button>
+        <button id="btnNuevo" class="btn btn-default" type="button">Nuevo Claustro</button>
       </div>
       <div class="col-md-4">
-        <button id="btnHistorico" type="button">Histórico de Claustro</button>
+        <button id="btnHistorico" class="btn btn-default" type="button">Histórico de Claustro</button>
       </div>
       <div class="col-md-4">
-        <button id="btnProfes" type="button">Actualizar Profesores</button>
+        <button id="btnProfes" class="btn btn-default" type="button">Actualizar Profesores</button>
       </div>
     </div>
     <br>
@@ -120,26 +120,15 @@ $result = $ldap->getProfes();
  <br> 
  <div class="row" id="historico">
   <div class="col-xs-6 col-md-4" id="hiz" >
-
-    <label>Listado de Claustros ordenado por:</label>
-    <select id="historicoSelect">
-      <option value="volvo"></option>
-    </select>
-    <textarea class="form-control" rows="4"></textarea>
+    <label>Listado de Claustros:</label>
+    <div id="historicoClaustros"></div>
   </div>
   <div class="col-xs-12 col-sm-6 col-md-8" id="hdr">
-
     <label>Datos del Claustro:</label>
-    <div class="jumbotron">
-      <laber id="datosClaustro"> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-      </laber>
-    </div>
-
+    <div class="jumbotron" id="datosClaustroHistorico"></div>
+  </div>
+  <div class="col-md-4 center-block">
+    <button type="button" class="btn btn-success center-block">Imprimir!</button>
   </div>
 </div>
 <hr>
@@ -157,7 +146,6 @@ $result = $ldap->getProfes();
       $("#titulo").hide();
       $("#nuevo").show();
       $("#historico").hide();
-      console.log("dentro");
       $("#selecProfe").change(function () {
         var str = "PROFESORES SELECCIONADOS:<br>";
         $( "select option:selected" ).each(function() {
@@ -165,19 +153,63 @@ $result = $ldap->getProfes();
         });
         $( "#seleccion" ).html("<div>"+str+"</div>");
       }).change();
-    });
+    });// fin nuevo 
     //HISTORICO
     $("#btnHistorico").click(function(){
       $("#titulo").hide();
       $("#nuevo").hide();
       $("#historico").show();
+      $.ajax({
+        url: "./librerias/php/funciones.php",
+        type: 'post',
+        dataType: 'json',
+        data: {historicos: "Claustro historico"},
+        success:function(respuesta){
+          console.log(respuesta[0]);
+          var tabla="<table id='tabla' border='1px'><tr><th>Título</th><th>Día</th><th>Cursos</th></tr>";
+          for (var i in respuesta){
+            tabla += "<tr id="+respuesta[i].id+"><td>"+respuesta[i].titulo+"</td><td>"+respuesta[i].dia+"</td><td>"+respuesta[i].curso+"</td></tr>";
+          }
+          tabla+="</table>";
+          // imprimimos tabala
+          $("#historicoClaustros").html(tabla);
+          // hacemos clickeable
+          $("#tabla tr td").click(function(){
+            var x = $(this).parent("tr");
+            console.log("attr",x.attr('id'));
+            //x.css("background-color","red");
+            $.ajax({
+              url: "./librerias/php/funciones.php",
+              type: 'post',
+              dataType: 'json',
+              data: {historico:x.attr('id')},
+              success:function(respuesta){
+                console.log(respuesta);
+                var datos="<div>";
+                datos+="<p><label><strong>Titulo: </strong></label>"+respuesta[0].titulo+"</p>";
+                datos+='<div class="row"><div class="col-md-5"><p><label><strong>Curso: </strong></label>'+respuesta[0].curso+'</p></div><div class="col-md-5"><p><label><strong>Día: </strong></label>'+respuesta[0].dia+'</p></div></div>';
+                datos+='<div class="row"><div class="col-md-5"><p><label><strong>Hora Inicio: </strong></label>'+respuesta[0].horaInicio+'</p></div><div class="col-md-5"><p><label><strong>Hora Fin: </strong></label>'+respuesta[0].horaFin+'</p></div></div>';
+                datos+='<p class="lead"><strong>Orden del día: </strong><article>'+respuesta[0].orden+'</article></p><p class="lead"><strong>Observaciones realizadas: </strong><article>'+respuesta[0].observacion+'</article></p>';
+                datos+="<strong>Profesores: </strong><br>";
+                for(var i=0;i<respuesta[1].length;i++){
+                  datos+='nombre: '+respuesta[2][i].nombre+" firma: "+respuesta[1][i].firma+"<br>";
+                }
+                datos+="</div>";
+                $("#datosClaustroHistorico").html(datos);
+              }
+            }).fail( function() {
+              alert("Error al buscar los claustros!");
+            });
+          });
+        }
+      });
+
     });// fin historico
     // ACTUALIZAR
     $("#btnProfes").click(function(){
       var datos =  '<?php echo json_encode($result); ?>';
       datos=JSON.parse(datos);
       console.log(typeof(datos));
-      alert("Se han actualizado correctamente!");
       $.ajax({
         url: "./librerias/php/funciones.php",
         type: 'post',
@@ -214,16 +246,37 @@ $result = $ldap->getProfes();
           data: {claustro:claustro},
           success:function(respuesta){
             if(respuesta=="ok"){
+
               alert("Creado correctamente!");
             }else alert("Error al crear un claustro!");
           }
         }).fail( function() {
           alert("Error al crear un claustro!");
         });
-
     });//fin botón CrearClaustro
   });
+  /*
+  * Funcion para realizar todas las peticiones Ajax.
+  * La url siempre es la misma, = que el método y el tipo de datos manejado.
+  * @param datos: son los datos a mandar
+  * @param nombreDato: es el monbre de la variable post a enviar.
+  */
+  function ajax(nombreDato,datos){
+    $.ajax({
+      url: "./librerias/php/funciones.php",
+      type: 'post',
+      dataType: 'json',
+      data: {nombreDato:datos},
+      success:function(respuesta){
+        if(respuesta=="ok"){
 
+          alert("Creado correctamente!");
+        }else alert("Error al crear un claustro!");
+      }
+    }).fail( function() {
+      alert("Error al crear un claustro!");
+    });
+  }
 </script>
 </body>
 </html>
