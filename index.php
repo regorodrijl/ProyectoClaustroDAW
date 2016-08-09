@@ -52,7 +52,7 @@ $result = $ldap->getProfes();
         <button id="btnNuevo" class="btn btn-default" type="button">Nuevo Claustro</button>
       </div>
       <div class="col-md-4">
-        <button id="btnHistorico" class="btn btn-default" type="button">Histórico de Claustro</button>
+        <button id="btnHistorico" class="btn btn-default" type="button">Histórico de Claustros</button>
       </div>
       <div class="col-md-4">
         <button id="btnProfes" class="btn btn-default" type="button">Actualizar Profesores</button>
@@ -188,9 +188,9 @@ $result = $ldap->getProfes();
               success:function(respuesta){
                 console.log(respuesta);
                 var datos="<div>";
-                datos+="<p><label><strong>Titulo: </strong></label>"+respuesta[0].titulo+"</p>";
-                datos+='<div class="row"><div class="col-md-5"><p><label><strong>Curso: </strong></label>'+respuesta[0].curso+'</p></div><div class="col-md-5"><p><label><strong>Día: </strong></label>'+respuesta[0].dia+'</p></div></div>';
-                datos+='<div class="row"><div class="col-md-5"><p><label><strong>Hora Inicio: </strong></label>'+respuesta[0].horaInicio+'</p></div><div class="col-md-5"><p><label><strong>Hora Fin: </strong></label>'+respuesta[0].horaFin+'</p></div></div>';
+                datos+="<p><label><strong>Titulo:&nbsp; </strong></label>"+respuesta[0].titulo+"</p>";
+                datos+='<div class="row"><div class="col-md-5"><p><label><strong>Curso:&nbsp; </strong></label>'+respuesta[0].curso+'</p></div><div class="col-md-5"><p><label><strong>Día:&nbsp; </strong></label>'+respuesta[0].dia+'</p></div></div>';
+                datos+='<div class="row"><div class="col-md-5"><p><label><strong>Hora Inicio:&nbsp; </strong></label>'+respuesta[0].horaInicio+'</p></div><div class="col-md-5"><p><label><strong>Hora Fin:&nbsp; </strong></label>'+respuesta[0].horaFin+'</p></div></div>';
                 datos+='<p class="lead"><strong>Orden del día: </strong><article>'+respuesta[0].orden+'</article></p><p class="lead"><strong>Observaciones realizadas: </strong><article>'+respuesta[0].observacion+'</article></p>';
                 datos+="<strong>Profesores: </strong><br>";
                 for(var i=0;i<respuesta[1].length;i++){

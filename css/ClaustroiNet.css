@@ -15,3 +15,6 @@
 #hdr{
 	background-color: yellow;
 }
+table{ 
+	cursor: pointer; cursor: hand; 
+}
