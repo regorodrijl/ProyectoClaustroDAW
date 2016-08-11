@@ -67,37 +67,37 @@ $result = $ldap->getProfes();
           <div class="form-group">
             <label class="col-sm-2 control-label">Título Claustro:</label>
             <div class="col-sm-4">
-              <input name="titulo" type="text" id="tituloClaustro" size="50" placeholder="Escriba un título para el Claustro." />
+            <input name="titulo" type="text" id="tituloClaustro" size="50" required placeholder="Escriba un título para el Claustro." />
             </div>
           </div>
           <div class="form-group">
             <label class="col-sm-2 control-label">Día:</label>
             <div class="col-sm-4">
-              <input name="fecha" type="date" id="fecha" value="<?php echo date('Y-m-d'); ?>" />
+              <input name="fecha" type="date" id="fecha" required value="<?php echo date('Y-m-d'); ?>" />
             </div>
             <label class="col-sm-2 control-label">Curso:</label>
             <div class="col-sm-4">
-              <input name="curso" type="text" id="curso" placeholder="Curso: 2015-2016" />
+              <input name="curso" type="text" id="curso" required placeholder="Curso: 2015-2016" />
             </div>
           </div>
           <div class="form-group">
             <label class="col-sm-2 control-label">Hora Inicio:</label>
             <div class="col-sm-4">
-              <input type="time" name="fecha" id="horaInicio" value="<?php echo date('H:i'); ?>">
+              <input type="time" name="fecha" id="horaInicio" required value="<?php echo date('H:i'); ?>">
             </div>
             <label class="col-sm-2 control-label">Hora Fin:</label>
             <div class="col-sm-4">
-              <input type="time" name="fecha" id="horaFin" value="<?php echo date('H:i'); ?>">
+              <input type="time" name="fecha" id="horaFin" required value="<?php echo date('H:i'); ?>">
             </div>
           </div>
         </form>
         <br>
         <label>Orden del día:</label>
-        <textarea id="orden" class="form-control" rows="4" placeholder="Escriba la orden del día."></textarea>
+        <textarea id="orden" class="form-control" rows="4" required placeholder="Escriba la orden del día."></textarea>
         <label>Observaciones:</label>
         <textarea id="observacion" class="form-control" rows="4" placeholder="Alguna observación?"></textarea>
       </div>
-      <select class="selectpicker" multiple id="selecProfe" data-live-search="true" title="Seleccione Profesor">  
+      <select class="selectpicker" required multiple id="selecProfe" data-live-search="true" title="Seleccione Profesor">  
         <?php    
         $result = $ldap->getProfes();
 
@@ -174,35 +174,40 @@ $result = $ldap->getProfes();
           // imprimimos tabala
           $("#historicoClaustros").html(tabla);
           // hacemos clickeable
+          $('tr').click( function() {
+            $(this).parents('table').find('tr').each( function( index, element ) {
+              $(element).removeClass('color');
+            } );
+            $(this).addClass('color');
+          } );
+
+          
           $("#tabla tr td").click(function(){
-            $(this).parent("tr").removeClass("color");
-            var x = $(this).parent("tr");
-            console.log("attr",x.attr('id'));
-            x.addClass("color");
-            //x.css("background-color","red");
-            $.ajax({
-              url: "./librerias/php/funciones.php",
-              type: 'post',
-              dataType: 'json',
-              data: {historico:x.attr('id')},
-              success:function(respuesta){
-                console.log(respuesta);
-                var datos="<div>";
-                datos+="<p><label><strong>Titulo:&nbsp; </strong></label>"+respuesta[0].titulo+"</p>";
-                datos+='<div class="row"><div class="col-md-5"><p><label><strong>Curso:&nbsp; </strong></label>'+respuesta[0].curso+'</p></div><div class="col-md-5"><p><label><strong>Día:&nbsp; </strong></label>'+respuesta[0].dia+'</p></div></div>';
-                datos+='<div class="row"><div class="col-md-5"><p><label><strong>Hora Inicio:&nbsp; </strong></label>'+respuesta[0].horaInicio+'</p></div><div class="col-md-5"><p><label><strong>Hora Fin:&nbsp; </strong></label>'+respuesta[0].horaFin+'</p></div></div>';
-                datos+='<p class="lead"><strong>Orden del día: </strong><article>'+respuesta[0].orden+'</article></p><p class="lead"><strong>Observaciones realizadas: </strong><article>'+respuesta[0].observacion+'</article></p>';
-                datos+="<strong>Profesores: </strong><br>";
-                for(var i=0;i<respuesta[1].length;i++){
-                  datos+='nombre: '+respuesta[2][i].nombre+" firma: "+respuesta[1][i].firma+"<br>";
-                }
-                datos+="</div>";
-                $("#datosClaustroHistorico").html(datos);
+           var x = $(this).parent("tr");
+
+           $.ajax({
+            url: "./librerias/php/funciones.php",
+            type: 'post',
+            dataType: 'json',
+            data: {historico:x.attr('id')},
+            success:function(respuesta){
+              console.log(respuesta);
+              var datos="<div>";
+              datos+="<p><label><strong>Titulo:&nbsp; </strong></label>"+respuesta[0].titulo+"</p>";
+              datos+='<div class="row"><div class="col-md-5"><p><label><strong>Curso:&nbsp; </strong></label>'+respuesta[0].curso+'</p></div><div class="col-md-5"><p><label><strong>Día:&nbsp; </strong></label>'+respuesta[0].dia+'</p></div></div>';
+              datos+='<div class="row"><div class="col-md-5"><p><label><strong>Hora Inicio:&nbsp; </strong></label>'+respuesta[0].horaInicio+'</p></div><div class="col-md-5"><p><label><strong>Hora Fin:&nbsp; </strong></label>'+respuesta[0].horaFin+'</p></div></div>';
+              datos+='<p class="lead"><strong>Orden del día: </strong><article>'+respuesta[0].orden+'</article></p><p class="lead"><strong>Observaciones realizadas: </strong><article>'+respuesta[0].observacion+'</article></p>';
+              datos+="<strong>Profesores: </strong><br>";
+              for(var i=0;i<respuesta[1].length;i++){
+                datos+='nombre: '+respuesta[2][i].nombre+" firma: "+respuesta[1][i].firma+"<br>";
               }
-            }).fail( function() {
-              alert("Error al buscar los claustros!");
-            });
+              datos+="</div>";
+              $("#datosClaustroHistorico").html(datos);
+            }
+          }).fail( function() {
+            alert("Error al buscar los claustros!");
           });
+        });
         }
       });
 
