@@ -313,9 +313,11 @@ $result = $ldap->getProfes();
       console.log($("#tituloClaustro").val());
       console.log(typeof($("#tituloClaustro").val()));
       //validar
+      /*
       if($("#tituloClaustro").val().trim() === ''){
         console.log("algo");
       }else console.log("nada");
+      */
       if($("#tituloClaustro").val() && $("#fecha").val() == "" && $("#horaInicio").val() == "" && $("#horaFin").val() == "" && $("#curso").val() == "" && $("#orden").val() == ""){
         alert("Relleno los campos: Título, día, Fecha, Hora Inicio, Hora Fin, Curso y Orden del Día.")
       }else{
@@ -333,15 +335,13 @@ $result = $ldap->getProfes();
             type: 'post',
             dataType: 'json',
             data: {claustro:claustro},
-            success:function(respuesta){
-              if(respuesta=="ok"){
-                alert("Creado correctamente!");
-              }else alert("Error al crear un claustro!");
-            }
-          }).fail( function() {
-            alert("Error al crear un claustro!");
-          });
-        }
+            success:function(crear){
+             alert("Creado correctamente!");   
+           }
+         }).fail( function() {
+          alert("Error al crear un claustro!");
+        });
+       }
     });//fin botón CrearClaustro
   });
 </script>

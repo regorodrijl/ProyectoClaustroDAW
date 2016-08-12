@@ -30,7 +30,7 @@ if(!empty($_POST['claustro'])){
 		$res = $_POST['claustro'];
 		if(!empty($res['titulo'])&& !empty($res['dia'])&& !empty($res['horaInicio'])&& !empty($res['horaFin'])&& !empty($res['curso'])&& !empty($res['orden'])){
 			//creamos el claustro
-			$stmt = $pdo->prepare("insert into claustro(titulo,dia,horaInicio,horaFin,curso,orden,observacion,activo) values(:titulo,:dia,:horaInicio,:horaFin,:curso,:orden,:observacion,:activo)");
+			$stmt = $pdo->prepare("insert into claustro(titulo,dia,horaInicio,horaFin,curso,orden,observacion,activo,borrado) values(:titulo,:dia,:horaInicio,:horaFin,:curso,:orden,:observacion,true,false)");
 			$stmt->bindParam(':titulo', $res['titulo']);
 			$stmt->bindParam(':dia', $res['dia']);
 			$stmt->bindParam(':horaInicio', $res['horaInicio']);
@@ -38,7 +38,6 @@ if(!empty($_POST['claustro'])){
 			$stmt->bindParam(':curso', $res['curso']);
 			$stmt->bindParam(':orden', $res['orden']);
 			$stmt->bindParam(':observacion', $res['observacion']);
-			$stmt->bindParam(':activo',true);
 			$stmt->execute();
 
 			if($stmt ==false){
@@ -76,7 +75,7 @@ if(!empty($_POST['claustro'])){
 					$stmt->bindParam(':idProfesor', $key["id"]);
 
 					if($stmt->execute()){
-						echo json_encode("ok");
+						echo json_encode("ok, insertado profe");
 					}else{
 						echo json_encode("ko");
 					}

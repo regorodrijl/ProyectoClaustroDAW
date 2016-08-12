@@ -1,20 +1,20 @@
 .color{
 	background-color: red;
 }
-#niz{
+/*#niz{
 	background-color: red;
 }
 #nuevo{
 	width: 100%;
 	height: 100%;
-	background-color: green;
+	background-color: green; 
 }
 #hiz{
 	background-color: blue;
 }
 #hdr{
 	background-color: yellow;
-}
+}*/
 table{ 
 	cursor: pointer; cursor: hand; 
 }
