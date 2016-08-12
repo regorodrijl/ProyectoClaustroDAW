@@ -392,16 +392,26 @@
         $arrayDatos=[];
        // $datos= new stdClass();
        //var_dump($data["count"]); 
+       // hago tanta comprobación, ya que devolvía errores porque hay campos que no tienen datos.
         for ($i=0; $i<$data["count"]; $i++) {
-          if(isset($data[$i]["mail"][0])) {
+          if(isset($data[$i]["displayname"][0])){
+           if(isset($data[$i]["mail"][0])) {
             //$datos->profe=$data[$i]["cn"][0];
             //$datos->email=$data[$i]["mail"][0];
-
-           array_push($arrayDatos,array("profe"=>$data[$i]["cn"][0],"email"=>$data[$i]["mail"][0],"apellidos"=>$data[$i]["displayname"][0]));
-         } else {
+             array_push($arrayDatos,array("profe"=>$data[$i]["cn"][0],"email"=>$data[$i]["mail"][0],"apellidos"=>$data[$i]["displayname"][0]));
+           } else {
            // $datos->profe=$data[$i]["cn"][0];
-          array_push($arrayDatos,array("profe"=>$data[$i]["cn"][0],"email"=>"sin email","apellidos"=>$data[$i]["displayname"][0]));
+            array_push($arrayDatos,array("profe"=>$data[$i]["cn"][0],"email"=>"sin email","apellidos"=>$data[$i]["displayname"][0]));
+          }
+        }else{
+          if(isset($data[$i]["mail"][0])) {
+            array_push($arrayDatos,array("profe"=>$data[$i]["cn"][0],"email"=>$data[$i]["mail"][0],"apellidos"=>"Sin nombre completo"));
+          } else {
+           // $datos->profe=$data[$i]["cn"][0];
+            array_push($arrayDatos,array("profe"=>$data[$i]["cn"][0],"email"=>"sin email","apellidos"=>"Sin nombre completo"));
+          }
         }
+
       }
       return $arrayDatos;
       //return $datos;

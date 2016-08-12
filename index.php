@@ -127,14 +127,17 @@ $result = $ldap->getProfes();
     <label>Datos del Claustro:</label>
     <div class="jumbotron" id="datosClaustroHistorico"></div>
   </div>
-  <div class="col-md-4 center-block">
+  <div class="col-md-3 center-block">
     <button type="button" id="imprimir" class="btn btn-success center-block">Imprimir!</button>
   </div>
-  <div class="col-md-4 center-block">
+  <div class="col-md-3 center-block">
     <button type="button" id="editar" class="btn btn-primary center-block">Editar!</button>
   </div>
-  <div class="col-md-4 center-block">
-  <button type="button" id="borrar" class="btn btn-danger center-block">Borrar!</button>
+  <div class="col-md-3 center-block">
+    <button type="button" id="borrar" class="btn btn-danger center-block">Borrar!</button>
+  </div>
+  <div class="col-md-3 center-block">
+    <button type="button" id="guardar" class="btn btn-info center-block">Guardar!</button>
   </div>
 </div>
 <hr>
@@ -150,6 +153,7 @@ $result = $ldap->getProfes();
     $("#imprimir").hide();
     $("#editar").hide();
     $("#borrar").hide();
+    $("#guardar").hide();
     $("#reset").click(function(){
       location.reload();
     });
@@ -194,6 +198,7 @@ $result = $ldap->getProfes();
           } );     
           $("#tabla tr td").click(function(){
             $("#imprimir").show();
+            $("#guardar").hide();
             $("#editar").show();
             $("#borrar").show();
             var x = $(this).parent("tr");
@@ -205,23 +210,80 @@ $result = $ldap->getProfes();
               success:function(respuesta){
                 console.log(respuesta);
                 var datos="<div>";
-                datos+="<p><label><strong>Titulo:&nbsp; </strong></label>"+respuesta[0].titulo+"</p>";
-                datos+='<div class="row"><div class="col-md-5"><p><label><strong>Curso:&nbsp; </strong></label>'+respuesta[0].curso+'</p></div><div class="col-md-5"><p><label><strong>Día:&nbsp; </strong></label>'+respuesta[0].dia+'</p></div></div>';
-                datos+='<div class="row"><div class="col-md-5"><p><label><strong>Hora Inicio:&nbsp; </strong></label>'+respuesta[0].horaInicio+'</p></div><div class="col-md-5"><p><label><strong>Hora Fin:&nbsp; </strong></label>'+respuesta[0].horaFin+'</p></div></div>';
-                datos+='<p class="lead"><strong>Orden del día: </strong><article>'+respuesta[0].orden+'</article></p><p class="lead"><strong>Observaciones realizadas: </strong><article>'+respuesta[0].observacion+'</article></p>';
+                datos+="<p><label><strong>Titulo:&nbsp; </strong></label><input id='t' disabled value='"+respuesta[0].titulo+"'/></p>";
+                datos+='<div class="row"><div class="col-md-5"><p><label><strong>Curso:&nbsp; </strong></label><input id="c" disabled value="'+respuesta[0].curso+'"/></p></div><div class="col-md-5"><p><label><strong>Día:&nbsp; </strong></label><input id="d" disabled value="'+respuesta[0].dia+'"/></p></div></div>';
+                datos+='<div class="row"><div class="col-md-5"><p><label><strong>Hora Inicio:&nbsp; </strong></label><input id="hi" disabled value="'+respuesta[0].horaInicio+'"/></p></div><div class="col-md-5"><p><label><strong>Hora Fin:&nbsp; </strong></label><input id="hf" disabled value="'+respuesta[0].horaFin+'"/></p></div></div>';
+                datos+='<p class="lead"><strong>Orden del día: </strong><article><textarea id="or" rows="4"  cols="75" readonly >'+respuesta[0].orden+'</textarea></article></p><p class="lead"><strong>Observaciones realizadas: </strong><article><textarea id="ob" rows="4"  cols="75" readonly >'+respuesta[0].observacion+'</textarea></article></p>';
                 datos+="<strong>Profesores: </strong><br>";
                 for(var i=0;i<respuesta[1].length;i++){
-                  datos+='nombre: '+respuesta[2][i].nombre+" firma: "+respuesta[1][i].firma+"<br>";
+                  datos+='<div>nombre: '+respuesta[2][i].nombre+" firma: "+respuesta[1][i].firma+"</div>";
                 }
                 datos+="</div>";
                 $("#datosClaustroHistorico").html(datos);
+                // para evitar problemas con id
+                $("#borrar").off("click");
+                // si hace click en borrar!
+                $("#borrar").click(function(){
+                  console.log("dentro de borrar, id:",respuesta[0].id);
+                  $.ajax({
+                    url: "./librerias/php/funciones.php",
+                    type: 'post',
+                    dataType: 'json',
+                    data: {borrar:respuesta[0].id},
+                    success:function(r){
+                      if(r=="ok"){ //respuesta[0].id
+                        $("#"+respuesta[0].id+" td").fadeOut(1000);
+                        $("#datosClaustroHistorico").html("");
+                        $("#editar").hide();
+                        $("#borrar").hide();
+                        $("#guardar").hide();
+                        $("#imprimir").hide();
+                        alert("borrado correctamente!");
+                      }else alert("Error al borrar un claustro! id: "+r);
+                    },
+                    error: function(xhr, status, error) {
+                      alert(xhr.responseText);
+                      console.log(xhr, status, error);
+                    }
+                  }).fail( function(error) {
+                    console.log(error);
+                  });
+                });
+                $("#editar").click(function(){ 
+                  $("#guardar").show();
+                  $("textarea").attr("readonly", false);
+                  $("input").prop('disabled', false);
+                });
+                $("#guardar").click(function(){
+                  var Gclaustro={
+                    "id":respuesta[0].id,
+                    "titulo":$("#t").val(),
+                    "dia": $("#d").val(),
+                    "horaInicio":$("#hi").val(),
+                    "horaFin":$("#hf").val(),
+                    "curso":$("#c").val(),
+                    "orden":$("#or").val(),
+                    "observacion":$("#ob").val(),
+                  };
+                  console.log(Gclaustro);
+                  // falta el selct con los profes
+                  $.ajax({
+                    url: "./librerias/php/funciones.php",
+                    type: 'post',
+                    dataType: 'json',
+                    data: {actualizarClaustro:Gclaustro},
+                    success:function(respuesta){
+                      if(respuesta=="ok"){
+                        alert("Actualizado correctamente!");
+                      }else alert("Error al crear un claustro!");
+                    }
+                  });
+                });
               }
-            }).fail( function() {
-              alert("Error al buscar los claustros!");
             });
-          });
-        }
-      });
+});
+}
+});
     });// fin historico
     // ACTUALIZAR Profesores por retocar
     $("#btnProfes").click(function(){

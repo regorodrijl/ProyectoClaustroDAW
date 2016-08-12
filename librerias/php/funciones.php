@@ -1,5 +1,6 @@
 <?php
-error_reporting(E_ALL ^ E_NOTICE);
+error_reporting(E_ALL);
+ini_set('display_errors', 'On');
 require_once("./conexion.php");
 $pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
 
@@ -21,7 +22,7 @@ if (!empty($_POST['datos'])){
 		}
 	}
 	catch(PDOException $e) {
-		echo "error: ".$e->getMessage();
+		echo  json_encode("error: ".$e->getMessage());
 	}
 }
 if(!empty($_POST['claustro'])){
@@ -86,13 +87,13 @@ if(!empty($_POST['claustro'])){
 		}
 	} 
 	catch(PDOException $e) {
-		echo "error: ".$e->getMessage();
+		echo  json_encode("error: ".$e->getMessage());
 	}
 }
 if(!empty($_POST['historicos'])){
 	try{
 		$arrayDatos=[];
-		$stmt = $pdo->prepare("select * from claustro order by id DESC;");
+		$stmt = $pdo->prepare("select * from claustro where activo=true and borrado=false order by id DESC;");
 		$stmt->execute();
 		$filas=$stmt->fetchAll(PDO::FETCH_ASSOC);
 		if($filas){
@@ -109,9 +110,10 @@ if(!empty($_POST['historicos'])){
 		echo json_encode($arrayDatos);
 	}
 	catch(PDOException $e) {
-		echo "error: ".$e->getMessage();
+		echo  json_encode("error: ".$e->getMessage());
 	}
 }
+
 if(!empty($_POST['historico'])){
 	try{
 		$id=$_POST['historico'];
@@ -159,8 +161,48 @@ if(!empty($_POST['historico'])){
 		//echo json_encode($arrayDatos);
 	}
 	catch(PDOException $e) {
-		echo "error: ".$e->getMessage();
+		echo  json_encode("error: ".$e->getMessage());
 	}
 }
+if(!empty($_POST['actualizarClaustro'])){
+	$update = $_POST['actualizarClaustro'];
+	try{
+		$stmt=$pdo->prepare("update claustro set titulo=:titulo, dia=:dia, horaInicio=:horaInicio, horaFin=:horaFin, curso=:curso, orden=:orden, observacion=:observacion, activo=true, borrado=false where id=:id");
+		$stmt->bindParam(':titulo', $update['titulo']);
+		$stmt->bindParam(':dia', $update['dia']);
+		$stmt->bindParam(':horaInicio', $update['horaInicio']);
+		$stmt->bindParam(':horaFin', $update['horaFin']);
+		$stmt->bindParam(':curso', $update['curso']);
+		$stmt->bindParam(':orden', $update['orden']);
+		$stmt->bindParam(':observacion', $update['observacion']);
+		$stmt->bindParam(':id',$update['id']);
 
+		if($stmt->execute()){
+			echo json_encode('ok');
+		}else {
+			echo json_encode('ko'.mysql_error($pdo));
+		}
+	}
+	catch(PDOException $e)
+	{
+		echo  json_encode("error: ".$e->getMessage());
+	}
+}
+if(!empty($_POST['borrar'])){
+	$borrarId = $_POST['borrar'];
+	$borrarId = intval($borrarId);
+	try{
+		$stmt=$pdo->prepare("update claustro set activo=false, borrado=true where id=:id");
+		$stmt->bindParam(":id",$borrarId);
+		if($stmt->execute()){
+			echo json_encode('ok');
+		}else {
+			echo json_encode('ko'.mysql_error($pdo));
+		}
+	}
+	catch(PDOException $e)
+	{
+		echo  json_encode("error: ".$e->getMessage());
+	}
+}
 ?>
