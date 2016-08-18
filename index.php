@@ -154,6 +154,27 @@ $result = $ldap->getProfes();
     $("#editar").hide();
     $("#borrar").hide();
     $("#guardar").hide();
+    var crear=false;
+    var claustroActivo=false;
+
+    $.ajax({
+      url: "./librerias/php/funciones.php",
+      type: 'post',
+      dataType: 'json',
+      data: {desactivar:"desactivar"},
+      success:function(desactivar){
+        //alert(desactivar);
+        if(desactivar=="ok"){
+          claustroActivo=false;
+          console.log("No hay claustro activo");
+        }else{
+          claustroActivo=true;
+          console.log("Hay clautro activos "+desactivar);
+        }
+      }
+    }).fail( function(error) {
+      console.log(error);
+    });
     $("#reset").click(function(){
       location.reload();
     });
@@ -169,6 +190,26 @@ $result = $ldap->getProfes();
         });
         $( "#seleccion" ).html("<div>"+str+"</div>");
       }).change();
+      //comprobar si hay clautro activo para esa fecha.
+      $("#fecha").focusout(function(){
+        console.log("cambio fecha"+$("#fecha").val());
+        $.ajax({
+          url: "./librerias/php/funciones.php",
+          type: 'post',
+          dataType: 'json',
+          data: {fecha:$("#fecha").val()},
+          success:function(fecha){
+            if(fecha=="ok"){
+              console.log("se puede crear!");
+            }else{
+              alert(fecha);
+              console.log("respuesta fecha "+fecha);
+            }
+          }
+        }).fail( function(error) {
+          console.log(error);
+        });
+      });
     });// fin nuevo 
     //HISTORICO
     $("#btnHistorico").click(function(){
@@ -187,7 +228,7 @@ $result = $ldap->getProfes();
             tabla += "<tr id="+respuesta[i].id+"><td>"+respuesta[i].titulo+"</td><td>"+respuesta[i].dia+"</td><td>"+respuesta[i].curso+"</td></tr>";
           }
           tabla+="</table>";
-          // imprimimos tabala
+          // imprimimos tabla
           $("#historicoClaustros").html(tabla);
           // hacemos clickeable
           $('tr').click( function() {
@@ -219,7 +260,7 @@ $result = $ldap->getProfes();
                   datos+='<div>nombre: '+respuesta[2][i].nombre+" firma: "+respuesta[1][i].firma+"</div>";
                 }
                 datos+="</div>";
-                $("#datosClaustroHistorico").html(datos);
+                $("#datosClaustroHistorico").html(datos);             
                 // para evitar problemas con id
                 $("#borrar").off("click");
                 // si hace click en borrar!
@@ -279,8 +320,8 @@ $result = $ldap->getProfes();
                     }
                   });
                 });
-              }
-            });
+              }//success
+            });// fin peticion ajax click en tabla
 });
 }
 });
@@ -306,42 +347,59 @@ $result = $ldap->getProfes();
     });// fin Botón Atualizar Profes
     // CREAR NUEVO CLAUSTRO
     $("#crearClaustro").click(function(){
-      var profes=[];
-      $("#selecProfe option:selected").each(function() {
-        profes.push($(this).val());
-      });
-      console.log($("#tituloClaustro").val());
-      console.log(typeof($("#tituloClaustro").val()));
-      //validar
-      /*
-      if($("#tituloClaustro").val().trim() === ''){
-        console.log("algo");
-      }else console.log("nada");
-      */
-      if($("#tituloClaustro").val() && $("#fecha").val() == "" && $("#horaInicio").val() == "" && $("#horaFin").val() == "" && $("#curso").val() == "" && $("#orden").val() == ""){
-        alert("Relleno los campos: Título, día, Fecha, Hora Inicio, Hora Fin, Curso y Orden del Día.")
-      }else{
-        var claustro={
-          "titulo":$("#tituloClaustro").val(),
-          "dia": $("#fecha").val(),
-          "horaInicio":$("#horaInicio").val(),
-          "horaFin":$("#horaFin").val(),
-          "curso":$("#curso").val(),
-          "orden":$("#orden").val(),
-          "observacion":$("#observacion").val(),
-          "profesores":profes };
-          $.ajax({
-            url: "./librerias/php/funciones.php",
-            type: 'post',
-            dataType: 'json',
-            data: {claustro:claustro},
-            success:function(crear){
-             alert("Creado correctamente!");   
-           }
-         }).fail( function() {
-          alert("Error al crear un claustro!");
+      //comprobar si hay clautro activo para esa fecha.      
+      console.log("cambio fecha "+$("#fecha").val());
+      $.ajax({
+        url: "./librerias/php/funciones.php",
+        type: 'post',
+        dataType: 'json',
+        data: {fecha:$("#fecha").val()},
+        success:function(fecha){
+          if(fecha=="ok"){
+            console.log("Se puede crear, Botón!");
+            var profes=[];
+            $("#selecProfe option:selected").each(function() {
+              profes.push($(this).val());
+            });
+            console.log('cuantos profes: '+profes.length);
+            if($("#tituloClaustro").val() && $("#fecha").val() == "" && $("#horaInicio").val() == "" && $("#horaFin").val() == "" && $("#curso").val() == "" && $("#orden").val() == "" && profes.length<=0){
+              alert("Relleno los campos: Título, día, Fecha, Hora Inicio, Hora Fin, Curso y Orden del Día.")
+            }else{
+              var claustro={
+                "titulo":$("#tituloClaustro").val(),
+                "dia": $("#fecha").val(),
+                "horaInicio":$("#horaInicio").val(),
+                "horaFin":$("#horaFin").val(),
+                "curso":$("#curso").val(),
+                "orden":$("#orden").val(),
+                "observacion":$("#observacion").val(),
+                "profesores":profes };
+                $.ajax({
+                  url: "./librerias/php/funciones.php",
+                  type: 'post',
+                  dataType: 'json',
+                  data: {claustro:claustro},
+                  success:function(crea){
+                    if(crea=="ko"){
+                      alert("Faltan datos!"); 
+                    }else{
+                      $("#tituloClaustro").val('');
+                      $("#curso").val('');
+                      $("#orden").val('');
+                      $("#observacion").val('');
+                      alert("Creado correctamente!"); 
+                    }
+                  }
+                })
+              }
+            }else{
+              alert("No se puede crear, revise el día");
+              console.log("No crear, respuesta fecha "+fecha+ " variable crear" +crear);
+            }
+          }
+        }).fail( function(error) {
+          console.log(error);
         });
-       }
     });//fin botón CrearClaustro
   });
 </script>

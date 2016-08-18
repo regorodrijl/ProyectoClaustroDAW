@@ -68,6 +68,7 @@ if(!empty($_POST['claustro'])){
 						print_r($errorCode);
 					}
 				}
+				$insertado=false;
 				foreach ($arrayIdProfes as $key ) {
 					// insertamos en firma
 					$stmt = $pdo->prepare("insert into firma(idClaustro,idProfesor) values(:idClaustro,:idProfesor)");
@@ -75,10 +76,16 @@ if(!empty($_POST['claustro'])){
 					$stmt->bindParam(':idProfesor', $key["id"]);
 
 					if($stmt->execute()){
-						echo json_encode("ok, insertado profe");
+						$insertado=true;
 					}else{
-						echo json_encode("ko");
+						$insertado=false;
 					}
+				}
+				if ($insertado==true) {
+					echo json_encode("ok");
+				}else{
+						echo json_encode("ko");
+
 				}
 			}
 		}else{
@@ -92,7 +99,7 @@ if(!empty($_POST['claustro'])){
 if(!empty($_POST['historicos'])){
 	try{
 		$arrayDatos=[];
-		$stmt = $pdo->prepare("select * from claustro where activo=true and borrado=false order by id DESC;");
+		$stmt = $pdo->prepare("select * from claustro where borrado=false order by id DESC;");
 		$stmt->execute();
 		$filas=$stmt->fetchAll(PDO::FETCH_ASSOC);
 		if($filas){
@@ -200,6 +207,65 @@ if(!empty($_POST['borrar'])){
 		}
 	}
 	catch(PDOException $e)
+	{
+		echo  json_encode("error: ".$e->getMessage());
+	}
+}
+if(!empty($_POST['desactivar'])){
+	$hoy=date('Y-m-d');
+	$diaClaustro;
+	try{
+		$stmt=$pdo->prepare("select * from claustro where activo=true");
+		$stmt->execute();
+		$filas=$stmt->fetch(PDO::FETCH_ASSOC);
+		if($filas){
+			$diaClaustro=$filas["dia"];
+			$desactivar=$filas["id"];
+			$fecha_actual = strtotime($hoy);
+			$fecha_entrada = strtotime($diaClaustro);
+			if($fecha_actual > $fecha_entrada){
+				//echo json_encode("La fecha entrada ya ha pasado ".$fecha_actual." ".$fecha_entrada);
+				$stmt=$pdo->prepare("update claustro set activo=false where id=:id");
+				$stmt->bindParam(":id",$desactivar);
+				if($stmt->execute()){
+					echo json_encode('ok');
+				}else {
+					echo json_encode('ko'.mysql_error($pdo));
+				}
+			}else{
+				echo json_encode("Aun falta algun tiempo");
+			}
+		}else {//no hay nada
+			echo json_encode('ok');
+		}
+	}
+	catch(PDOException $e)
+	{
+		echo  json_encode("error: ".$e->getMessage());
+	}
+}
+if(!empty($_POST['fecha'])){
+	$fechaProbar=$_POST['fecha'];
+	$diaClaustro;
+	try{
+		$stmt=$pdo->prepare("select * from claustro where activo=true");
+		$stmt->execute();
+		$filas=$stmt->fetch(PDO::FETCH_ASSOC);
+		if($filas){
+			$diaClaustro=$filas["dia"];
+			$idClaustro=$filas["id"];
+			$fechaPrueba = strtotime($fechaProbar);
+			$fechaClaustro = strtotime($diaClaustro);
+			if($fechaPrueba === $fechaClaustro){
+				//no dejamos crearlo
+				echo json_encode('No se puede crear');
+			}else {
+				echo json_encode('ok');
+			}
+		}else {//no hay nada
+			echo json_encode('ok');
+		}
+	}catch(PDOException $e)
 	{
 		echo  json_encode("error: ".$e->getMessage());
 	}
