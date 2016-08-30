@@ -1,41 +1,55 @@
 <?php 
 require_once('./conexion.php');
-$pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
+//$pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
+header('Content-type: application/json');
 
-if(!empty($_POST['nombre'])&&!empty($_POST['img'])){
-	$nombre=$_POST['nombre'];
-	$img=$_POST['img'];
-	$hoy=date('Y-m-d');
+if($_SERVER['REQUEST_METHOD'] == "POST"){
+	if(!empty($_POST['nombre'])&&!empty($_POST['img'])){
+		$nombre=trim($_POST['nombre']);
+		$img=$_POST['img'];
+		$hoy=date('Y-m-d');
 
-	$stmt = $pdo->prepare('select * from claustro where activo=true and dia=?;');
-	$stmt->bindParam(1,$hoy);
-	$stmt->execute();
-	$filas=$stmt->fetchAll(PDO::FETCH_ASSOC);
-	if($filas){
-		foreach ($filas as $fila ) {
-			$idClaustro=$fila['id'];
-		}
-		$stmtProfesor = $pdo->prepare("select * from profesor where nombre=?");
-		$stmtProfesor->bindParam(1, $nombre,PDO::PARAM_STR);
-		$stmtProfesor->execute();
-		$filasProfe=$stmtProfesor->fetch(PDO::FETCH_ASSOC);
-		if($filasProfe){
-			$idProfesor=$filas['id'];
+		//file_put_contents('nombre.txt', file_get_contents($nombre));
+		
+		@file_put_contents('img.txt', file_get_contents($img));
 
-			$stmtFirma = $pdo->prepare("update firma set firma=:firma where idClaustro=:idClaustro and idProfesor=:idProfesor");
-			$stmtFirma->bindParam(':firma', $img);
-			$stmtFirma->bindParam(':idClaustro', $idClaustro);
-			$stmtFirma->bindParam(':idProfesor', $idProfesor);
-			if($stmtFirma->execute()){
-				echo json_encode('ok, insertada firma');
-			}else {
-				echo json_encode('ko, problema al firmar '.mysql_error($pdo));
+		$stmt = $pdo->prepare('select * from claustro where activo=true and dia=?;');
+		$stmt->bindParam(1,$hoy);
+		$stmt->execute();
+		$filas=$stmt->fetchAll(PDO::FETCH_ASSOC);
+		if($filas){
+			foreach ($filas as $fila ) {
+				$idClaustro=$fila['id'];
+			}
+			$stmtProfesor = $pdo->prepare("select * from profesor where nombre=?");
+			$stmtProfesor->bindParam(1, $nombre,PDO::PARAM_STR);
+			$stmtProfesor->execute();
+			$filasProfe=$stmtProfesor->fetch(PDO::FETCH_ASSOC);
+			if($filasProfe){
+				$idProfesor=$filasProfe['id'];
+
+				$stmtFirma = $pdo->prepare("update firma set firma=:firma where idClaustro=:idClaustro and idProfesor=:idProfesor");
+				$stmtFirma->bindParam(':firma', $img);
+				$stmtFirma->bindParam(':idClaustro', $idClaustro);
+				$stmtFirma->bindParam(':idProfesor', $idProfesor);
+				if($stmtFirma->execute()){
+					//echo json_encode(array('status' => 'ok', 'msg' => 'Firma Guardada, nombre del profesor: '. $nombre));
+				}else {
+					echo json_encode(array('status' => 'ko', 'msg' => 'Error al guardar!'));
+				}
+			}else{
+				echo json_encode(array('status' => 'ko', 'msg' => 'Problema al seleccionar profe.'));
 			}
 		}else{
-			echo json_encode('ko, problema al seleccionar profe '.mysql_error($pdo));
+			echo json_encode(array('status' => 'ko', 'msg' => 'Problema al seleccionar claustro.'));
 		}
 	}else{
-		echo json_encode('ko, problema al seleccionar claustro '.mysql_error($pdo));
+		//$data = file_get_contents('php://input');
+		//echo json_encode(array('status' => 'ko', 'msg' => 'No entra.'.var_dump($data)));
+		//echo json_encode(array('status' => 'ko', 'msg' => 'No entra.'.base64_decode($data)));
+		echo json_encode(array('status' => 'ko', 'msg' =>"No entro!"));
+		var_dump($_POST['img']);
+
 	}
 }else{
 	try{
@@ -98,10 +112,12 @@ if(!empty($_POST['nombre'])&&!empty($_POST['img'])){
 		}else{
 			$arry=$stmt->errorInfo();
 			$errorCode=$stmt->errorCode();
-			echo json_encode('No hay datos errores '.$arry.' codigo: '.$errorCode);
+			array_push($noHay,array('id'=>0,'nombre'=>'No hay claustro para hoy'));
+			echo json_encode($noHay);
+			//echo json_encode('No hay datos errores '.$arry.' codigo: '.$errorCode);
 		}
 	}
 	catch(PDOException $e) {
 		echo  json_encode('error: '.$e->getMessage());
 	}
-}
+}?>

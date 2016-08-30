@@ -8,16 +8,43 @@ if (!empty($_POST['datos'])){
 	//print_r(json_decode($_POST['datos']));
 	try{	
 		$result = $_POST['datos'];
-		
+		$todoBien=false;
 		foreach ($result as  $key) {
-			$stmt = $pdo->prepare("insert into profesor(nombre,email) values(:nombre,:email)");
-			$stmt->bindParam(':nombre', $key['apellidos']);
+			$patron="/[P|p]rofe\s-(\s[0-9]*)?/";
+			$nombre=trim($key['apellidos']);
+			$nombre=preg_replace($patron,"",$nombre);
+			//select de cada uno, si esta no hacer nada, si no insertar.
+			$stmt = $pdo->prepare("select * from profesor where nombre=:nombre and email=:email");
+			$stmt->bindParam(':nombre', $nombre);
 			$stmt->bindParam(':email', $key['email']);
 			$stmt->execute();
-		}    
-		if($stmt->execute()){
+			$profe=$stmt->fetch(PDO::FETCH_ASSOC);
+			if($profe){
+				//hacer update
+				$stmtUP=$pdo->prepare("update profesor set nombre=:nombre, email=:email where id=:id");
+				$stmtUP->bindParam(':nombre', $nombre);
+				$stmtUP->bindParam(':email', $key['email']);
+				$stmtUP->bindParam(':id',$profe['id']);
+				if($stmtUP->execute()){
+					$todoBien=true;
+				}else {
+					$todoBien=false;
+				}
+				//array_push($arrayIdProfes,array("id"=>$profe['id']));	
+			}else {
+				$stmtInsert = $pdo->prepare("insert into profesor(nombre,email) values(:nombre,:email)");
+				$stmtInsert->bindParam(':nombre', $nombre);
+				$stmtInsert->bindParam(':email', $key['email']);
+				if($stmtInsert->execute()){
+					$todoBien=true;
+				}else {
+					$todoBien=false;
+				}
+			}
+		}
+		if($todoBien==true){
 			echo json_encode("ok");
-		}else{
+		}else {
 			echo json_encode("ko");
 		}
 	}
@@ -84,7 +111,7 @@ if(!empty($_POST['claustro'])){
 				if ($insertado==true) {
 					echo json_encode("ok");
 				}else{
-						echo json_encode("ko");
+					echo json_encode("ko");
 
 				}
 			}

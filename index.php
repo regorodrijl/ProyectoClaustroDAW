@@ -5,7 +5,6 @@ require("./librerias/ldap/class.ldap.php");
 $ldap = new ldap(Config::$ldapServidor);
 //print_r($ldap->getProfes());
 $result = $ldap->getProfes();
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -46,17 +45,18 @@ $result = $ldap->getProfes();
     </div>
     <h2 id="reset">ClaustroiNet</h2>
   </div>
+  <div align="center" id="contenidoAjax"> </div>
   <div class="container" >
     <div class="row" align="center">
-      <div class="col-md-4">
+      <div class="col-md-6">
         <button id="btnNuevo" class="btn btn-default" type="button">Nuevo Claustro</button>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-6">
         <button id="btnHistorico" class="btn btn-default" type="button">Histórico de Claustros</button>
       </div>
-      <div class="col-md-4">
+     <!-- <div class="col-md-4">
         <button id="btnProfes" class="btn btn-default" type="button">Actualizar Profesores</button>
-      </div>
+      </div> -->
     </div>
     <br>
 
@@ -148,6 +148,8 @@ $result = $ldap->getProfes();
 </div>
 <script type="text/javascript">
   $(document).ready(function(){
+    var $contenidoAjax = $('div#contenidoAjax').html('<p><img src="./src/loader.gif" /></p>');
+    //al entrar en la web, actualizar profesor y desactivar los claustros activos.
     $("#historico").hide();
     $("#nuevo").hide();
     $("#imprimir").hide();
@@ -156,7 +158,24 @@ $result = $ldap->getProfes();
     $("#guardar").hide();
     var crear=false;
     var claustroActivo=false;
-
+    // Actualizar profes.
+    var datosProfesActualizar =  '<?php echo json_encode($result); ?>';
+    datosProfesActualizar=JSON.parse(datosProfesActualizar);
+    $.ajax({
+      url: "./librerias/php/funciones.php",
+      type: 'post',
+      dataType: 'json',
+      data: {datos:datosProfesActualizar},
+      success:function(respuesta){
+        $('div#contenidoAjax').hide();
+        if(respuesta=="ok"){
+          alert("Profesores actualizados correctamente!!");
+        }else alert("Error al actualizar!");
+      }      
+    }).fail( function(error) {
+      console.log(error); 
+    });// fin Botón Atualizar Profes
+    // desactivar claustro activos.
     $.ajax({
       url: "./librerias/php/funciones.php",
       type: 'post',
@@ -326,25 +345,6 @@ $result = $ldap->getProfes();
 }
 });
     });// fin historico
-    // ACTUALIZAR Profesores por retocar
-    $("#btnProfes").click(function(){
-      var datos =  '<?php echo json_encode($result); ?>';
-      datos=JSON.parse(datos);
-      console.log(typeof(datos));
-      $.ajax({
-        url: "./librerias/php/funciones.php",
-        type: 'post',
-        dataType: 'json',
-        data: {datos:datos},          
-        success:function(respuesta){
-          if(respuesta=="ok"){
-            alert("Profesores actualizados correctamente!!");
-          }else alert("Error al actualizar!");
-        }
-      }).fail( function() {
-        alert("Error al actualizar!");
-      });
-    });// fin Botón Atualizar Profes
     // CREAR NUEVO CLAUSTRO
     $("#crearClaustro").click(function(){
       //comprobar si hay clautro activo para esa fecha.      
