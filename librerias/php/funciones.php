@@ -297,4 +297,21 @@ if(!empty($_POST['fecha'])){
 		echo  json_encode("error: ".$e->getMessage());
 	}
 }
+if(!empty($_POST['rellenar'])){
+	try{
+		$arrayD=[];
+		$stmt=$pdo->prepare("select * from profesor");
+		$stmt->execute();
+		$filas=$stmt->fetchAll(PDO::FETCH_ASSOC);
+		if($filas){
+			foreach ($filas as $fila ) {
+				array_push($arrayD,array("id"=>$fila["id"],"nombre"=>$fila["nombre"],"email"=>$fila["email"]));	
+			}
+			echo json_encode($arrayD);
+		}
+	}catch(PDOException $e)
+	{
+		echo  json_encode("error: ".$e->getMessage());
+	}
+}
 ?>

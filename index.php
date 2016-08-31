@@ -97,28 +97,30 @@ $result = $ldap->getProfes();
         <label>Observaciones:</label>
         <textarea id="observacion" class="form-control" rows="4" placeholder="Alguna observación?"></textarea>
       </div>
-      <select class="selectpicker" required multiple id="selecProfe" data-live-search="true" title="Seleccione Profesor">  
-        <?php    
+      <div id="selectProfesores">
+       <select class="selectpicker" required multiple id="selecProfe" data-live-search="true" title="Seleccione Profesor">  
+       <!--  <php    
         $result = $ldap->getProfes();
 
         foreach ($result as  $key) {
           ?>
-          <option value=" <?php  echo $key['apellidos'] ?> " >
-            <?php  echo $key['apellidos'] ?>
+          <option value=" <php  echo $key['apellidos'] ?> " >
+            <php  echo $key['apellidos'] ?>
           </option> 
-          <?php
+          <php
         }    
-        ?> 
+        ?> -->
       </select>
-      <div id="seleccion"></div>
     </div>
-    <div>
-     <button id="crearClaustro" class=".col-md-3 .col-md-offset-3 center-block">Crear Claustro</button>
-   </div>
+    <div id="seleccion"></div>
+  </div>
+  <div>
+   <button id="crearClaustro" class=".col-md-3 .col-md-offset-3 center-block">Crear Claustro</button>
  </div>
+</div>
 
- <br> 
- <div class="row" id="historico">
+<br> 
+<div class="row" id="historico">
   <div class="col-xs-6 col-md-4" id="hiz" >
     <label>Listado de Claustros:</label>
     <div id="historicoClaustros"></div>
@@ -161,6 +163,7 @@ $result = $ldap->getProfes();
     // Actualizar profes.
     var datosProfesActualizar =  '<?php echo json_encode($result); ?>';
     datosProfesActualizar=JSON.parse(datosProfesActualizar);
+
     $.ajax({
       url: "./librerias/php/funciones.php",
       type: 'post',
@@ -170,6 +173,22 @@ $result = $ldap->getProfes();
         $('div#contenidoAjax').hide();
         if(respuesta=="ok"){
           alert("Profesores actualizados correctamente!!");
+
+
+          $select = $('#selecProfe');
+          //rellenar select
+          $.ajax({
+            url: "./librerias/php/funciones.php",
+            type: 'post',
+            dataType: 'json',
+            data: {rellenar:"ja"},
+            success:function(respuesta){
+              $.each(respuesta, function(id,value){
+                $('<option/>').val(value.nombre).text(value.nombre).appendTo($("#selecProfe"));
+              });
+              $('.selectpicker').selectpicker('refresh');
+            }      
+          });
         }else alert("Error al actualizar!");
       }      
     }).fail( function(error) {
@@ -196,7 +215,7 @@ $result = $ldap->getProfes();
     });
     $("#reset").click(function(){
       location.reload();
-    });
+    });// fin desactivar Claustro activo
     // NUEVO
     $("#btnNuevo").click(function(){
       $("#titulo").hide();
@@ -339,15 +358,15 @@ $result = $ldap->getProfes();
                     }
                   });
                 });
-              }//success
+              }
             });// fin peticion ajax click en tabla
-});
-}
-});
+          });
+        }
+      });
     });// fin historico
     // CREAR NUEVO CLAUSTRO
     $("#crearClaustro").click(function(){
-      //comprobar si hay clautro activo para esa fecha.      
+      //comprobar si hay clautro activo para esa fecha.     
       console.log("cambio fecha "+$("#fecha").val());
       $.ajax({
         url: "./librerias/php/funciones.php",
