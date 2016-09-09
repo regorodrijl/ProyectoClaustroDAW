@@ -1,18 +1,20 @@
 <?php 
 require_once('./conexion.php');
-//$pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
-header('Content-type: application/json');
+$pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
+//header('Content-type: application/json');
+header('Content-Type: bitmap; charset=utf-8');
 
 if($_SERVER['REQUEST_METHOD'] == "POST"){
 	if(!empty($_POST['nombre'])&&!empty($_POST['img'])){
 		$nombre=trim($_POST['nombre']);
 		$img=$_POST['img'];
+		/*$buscar=array(chr(13).chr(10), "\r\n", "\n", "\r");
+		$reemplazar=array("", "", "", "");
+		$img=str_ireplace($buscar,$reemplazar,$img);
+*/
 		$hoy=date('Y-m-d');
-
 		//file_put_contents('nombre.txt', file_get_contents($nombre));
-		
-		@file_put_contents('img.txt', file_get_contents($img));
-
+		//@file_put_contents('img.txt', file_get_contents($img));
 		$stmt = $pdo->prepare('select * from claustro where activo=true and dia=?;');
 		$stmt->bindParam(1,$hoy);
 		$stmt->execute();
@@ -33,7 +35,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
 				$stmtFirma->bindParam(':idClaustro', $idClaustro);
 				$stmtFirma->bindParam(':idProfesor', $idProfesor);
 				if($stmtFirma->execute()){
-					//echo json_encode(array('status' => 'ok', 'msg' => 'Firma Guardada, nombre del profesor: '. $nombre));
+					echo json_encode(array('status' => 'ok', 'msg' => 'Firma Guardada, nombre del profesor: '. $nombre));
 				}else {
 					echo json_encode(array('status' => 'ko', 'msg' => 'Error al guardar!'));
 				}
@@ -48,8 +50,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
 		//echo json_encode(array('status' => 'ko', 'msg' => 'No entra.'.var_dump($data)));
 		//echo json_encode(array('status' => 'ko', 'msg' => 'No entra.'.base64_decode($data)));
 		echo json_encode(array('status' => 'ko', 'msg' =>"No entro!"));
-		var_dump($_POST['img']);
-
+		//var_dump($_POST['img']);
 	}
 }else{
 	try{
@@ -76,8 +77,8 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
 				//echo json_encode("Aun falta algun tiempo");
 				}
 			}
-		//echo json_encode($arrayDatos);
-		//echo json_encode($fila);
+			//echo json_encode($arrayDatos);
+			//echo json_encode($fila);
 
 			if($control==true){
 				$stmtFirma = $pdo->prepare('select * from firma where idClaustro=?;');
@@ -100,7 +101,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
 							}
 						}
 					}				
-			//array_push($arrayDatos,$firma,$prof);
+					//array_push($arrayDatos,$firma,$prof);
 					echo json_encode($prof);
 				}else{
 				//echo json_encode($arrayDatos);
@@ -120,4 +121,5 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
 	catch(PDOException $e) {
 		echo  json_encode('error: '.$e->getMessage());
 	}
-}?>
+}
+?>

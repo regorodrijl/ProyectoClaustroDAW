@@ -11,7 +11,7 @@ $result = $ldap->getProfes();
 <head>
   <meta charset="utf-8">
   <meta name="description" content="Proyecto DAW IES San Clemente. Claustro de Profesores.">
-  <meta name="author" content="Jose Luis Rego Rodríguez y Óscar Fuentes Maña">
+  <meta name="author" content="Jose Luis Rego Rodríguez">
   <link rel="icon" href="../../favicon.ico">
   <link rel="stylesheet" type="text/css" href="css/ClaustroiNet.css">
   <title>ClaustroiNet</title>
@@ -33,7 +33,8 @@ $result = $ldap->getProfes();
 
   <!-- Latest compiled and minified JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
-
+  <!-- Libreria para imprimir -->
+  <script type="text/javascript" src="librerias/js/jquery.PrintArea.js"></script>
 
 
 </head>
@@ -129,6 +130,7 @@ $result = $ldap->getProfes();
     <label>Datos del Claustro:</label>
     <div class="jumbotron" id="datosClaustroHistorico"></div>
   </div>
+  <div id="display_dialog"></div>
   <div class="col-md-3 center-block">
     <button type="button" id="imprimir" class="btn btn-success center-block">Imprimir!</button>
   </div>
@@ -150,6 +152,7 @@ $result = $ldap->getProfes();
 </div>
 <script type="text/javascript">
   $(document).ready(function(){
+    var profesPDF=[]; 
     var $contenidoAjax = $('div#contenidoAjax').html('<p><img src="./src/loader.gif" /></p>');
     //al entrar en la web, actualizar profesor y desactivar los claustros activos.
     $("#historico").hide();
@@ -163,7 +166,7 @@ $result = $ldap->getProfes();
     // Actualizar profes.
     var datosProfesActualizar =  '<?php echo json_encode($result); ?>';
     datosProfesActualizar=JSON.parse(datosProfesActualizar);
-
+    // poner: cargando...
     $.ajax({
       url: "./librerias/php/funciones.php",
       type: 'post',
@@ -172,9 +175,6 @@ $result = $ldap->getProfes();
       success:function(respuesta){
         $('div#contenidoAjax').hide();
         if(respuesta=="ok"){
-          alert("Profesores actualizados correctamente!!");
-
-
           $select = $('#selecProfe');
           //rellenar select
           $.ajax({
@@ -189,6 +189,7 @@ $result = $ldap->getProfes();
               $('.selectpicker').selectpicker('refresh');
             }      
           });
+          alert("Profesores actualizados correctamente!!");
         }else alert("Error al actualizar!");
       }      
     }).fail( function(error) {
@@ -250,6 +251,7 @@ $result = $ldap->getProfes();
       });
     });// fin nuevo 
     //HISTORICO
+    var datos;
     $("#btnHistorico").click(function(){
       $("#titulo").hide();
       $("#nuevo").hide();
@@ -274,7 +276,8 @@ $result = $ldap->getProfes();
               $(element).removeClass('color');
             } );
             $(this).addClass('color');
-          } );     
+          } );   
+
           $("#tabla tr td").click(function(){
             $("#imprimir").show();
             $("#guardar").hide();
@@ -287,17 +290,25 @@ $result = $ldap->getProfes();
               dataType: 'json',
               data: {historico:x.attr('id')},
               success:function(respuesta){
-                console.log(respuesta);
-                var datos="<div>";
+                profesPDF=[]; 
+                console.log("datos  ",respuesta);
+                datos="<div id='datosPHP'>";
                 datos+="<p><label><strong>Titulo:&nbsp; </strong></label><input id='t' disabled value='"+respuesta[0].titulo+"'/></p>";
                 datos+='<div class="row"><div class="col-md-5"><p><label><strong>Curso:&nbsp; </strong></label><input id="c" disabled value="'+respuesta[0].curso+'"/></p></div><div class="col-md-5"><p><label><strong>Día:&nbsp; </strong></label><input id="d" disabled value="'+respuesta[0].dia+'"/></p></div></div>';
                 datos+='<div class="row"><div class="col-md-5"><p><label><strong>Hora Inicio:&nbsp; </strong></label><input id="hi" disabled value="'+respuesta[0].horaInicio+'"/></p></div><div class="col-md-5"><p><label><strong>Hora Fin:&nbsp; </strong></label><input id="hf" disabled value="'+respuesta[0].horaFin+'"/></p></div></div>';
                 datos+='<p class="lead"><strong>Orden del día: </strong><article><textarea id="or" rows="4"  cols="75" readonly >'+respuesta[0].orden+'</textarea></article></p><p class="lead"><strong>Observaciones realizadas: </strong><article><textarea id="ob" rows="4"  cols="75" readonly >'+respuesta[0].observacion+'</textarea></article></p>';
-                datos+="<strong>Profesores: </strong><br>";
-                for(var i=0;i<respuesta[1].length;i++){
-                  datos+='<div>nombre: '+respuesta[2][i].nombre+" firma: "+respuesta[1][i].firma+"</div>";
+                datos+="<strong>Número de Profesores asistentes: </strong><br><div STYLE='background-color:WHITE' align='center'><table cellspacing='10' cellpadding='pixels' border='1px' style=' width: 100%'>";
+
+                for(var i=0;i<respuesta[1].length;i++){ 
+                  console.log("FIRMA",respuesta[1][i].firma.length);
+                  if(respuesta[1][i].firma.length<=23){
+                    profesPDF.push([respuesta[2][i].nombre]);
+                  }else{
+                    profesPDF.push([respuesta[2][i].nombre,respuesta[1][i].firma]);
+                  }
+                  datos+='<tr><td align="center" valign="middle" style="font-weight:bold">  '+respuesta[2][i].nombre+'  </td><td align="center" valign="middle"> <img src="'+respuesta[1][i].firma+'" alt="Sin Firma" width="100" height="50"></td></tr>';
                 }
-                datos+="</div>";
+                datos+="</table></div></div>";
                 $("#datosClaustroHistorico").html(datos);             
                 // para evitar problemas con id
                 $("#borrar").off("click");
@@ -360,9 +371,9 @@ $result = $ldap->getProfes();
                 });
               }
             });// fin peticion ajax click en tabla
-          });
-        }
-      });
+});
+}
+});
     });// fin historico
     // CREAR NUEVO CLAUSTRO
     $("#crearClaustro").click(function(){
@@ -420,6 +431,28 @@ $result = $ldap->getProfes();
           console.log(error);
         });
     });//fin botón CrearClaustro
+    //IMPRIMIR
+    $("#imprimir").click(function(){
+      $('div#contenidoAjax').show();
+      var datosPDF={"title":$("#t").val(),"date":$("#d").val(),"curso":$("#c").val(),"hi":$("#hi").val(),"hf":$("#hf").val(),"or":$("#or").val(),"ob":$("#ob").val(),"firmas":profesPDF};
+
+      console.log("DATOS A ENVIAR:",datosPDF);
+      var name=$("#d").val();
+      $.ajax({
+        type: "POST",
+        dataType: 'text',
+        dataType: 'json',
+        url: "./librerias/php/funciones.php",
+        data: {pdf:datosPDF,nombre:name},
+        success: function(pdf) {
+          $('div#contenidoAjax').hide();
+          console.log("url->",pdf);
+          window.open(pdf, '_blank');
+        }
+      });
+
+
+    });//fin imprimir
   });
 </script>
 </body>

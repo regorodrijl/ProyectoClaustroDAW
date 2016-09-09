@@ -1,7 +1,16 @@
 <?php
 error_reporting(E_ALL);
+set_time_limit(0);
 ini_set('display_errors', 'On');
 require_once("./conexion.php");
+require 'vendor/autoload.php';
+require 'fpdf181/fpdf.php';
+define('UPLOAD_DIR', 'PDFs/');
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
+
+
 $pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
 
 if (!empty($_POST['datos'])){
@@ -166,8 +175,16 @@ if(!empty($_POST['historico'])){
 				$dat=[];
 				$prof=[];
 				foreach ($filaFirma as $fila ) {
-					# code...
-					array_push($dat,array("id"=>$fila["id"],"claustro"=>$fila["idClaustro"],"profesor"=>$fila["idProfesor"],"firma"=>$fila["firma"]));
+					//$asistentes=0;
+					$img = $fila["firma"];
+					
+					$img = str_replace('data:image/png;base64,', '', $img);
+					$img = str_replace(' ', '+', $img);
+					$data = base64_decode($img);
+					$src = 'data: image/png;base64,'.$img;
+
+
+					array_push($dat,array("id"=>$fila["id"],"claustro"=>$fila["idClaustro"],"profesor"=>$fila["idProfesor"],"firma"=>$src));
 
 					$stmtProfe = $pdo->prepare("select * from profesor where id=?;");
 					$stmtProfe->bindParam(1,$fila["idProfesor"]);
@@ -313,5 +330,92 @@ if(!empty($_POST['rellenar'])){
 	{
 		echo  json_encode("error: ".$e->getMessage());
 	}
+}
+if(!empty($_POST['pdf'])){
+	$name=str_replace(" ","+",$_POST['nombre']);
+	$nombre = $name;
+
+	$html=$_POST['pdf'];
+
+	if(file_exists(UPLOAD_DIR.$nombre.".pdf")){
+		echo json_encode("http://regorodri.noip.me/proyecto/librerias/php/".UPLOAD_DIR.$nombre.".pdf");
+	}else{
+
+		class PDF extends FPDF{
+			public function Header(){
+				$this->Image('../../src/logo.png',10,8,33);
+				$this->SetFont('Arial','B',15);
+				$this->Cell(80);
+				$this->Cell(30,10,'IES San Clemente',0,0,'C');
+				$this->Ln(40);
+			}
+		}
+
+		// Creación del objeto de la clase heredada
+		$pdf = new PDF();
+		$pdf->AddPage();
+		$pdf->SetFont('Times','',12);
+
+		$pdf->Cell(0,10,utf8_decode('Título: '.$html["title"]),0,1);
+		$pdf->Cell(0,10,utf8_decode('Fecha realización del Claustro: '.$html["date"]),0,1);
+		$pdf->Cell(0,10,'Curso: '.$html["curso"],0,1);
+		$pdf->Cell(0,10,'Hora Inicio: '.$html["hi"],0,1);
+		$pdf->Cell(0,10,'Hora Fin: '.$html["hf"],0,1);
+		$pdf->Cell(0,10,utf8_decode('Orden del día: '.$html["or"]),0,1);
+		$pdf->Cell(0,10,utf8_decode('Observaciones: '.$html["ob"]),0,1);
+		if(count($html["firmas"])>1){
+			$pdf->Cell(0,10,'Asistecias: ',0,1);
+
+			foreach ($html["firmas"] as $key ) {
+
+				//crear la imagen FIRMAS y luego borrarla
+				$pdf->Cell(0,10,utf8_decode($key[0]),0,1);
+
+
+				if(empty($key[1])){
+				//echo json_encode($key[1]."\n");
+					$pdf->Cell(0,10,utf8_decode("No firmó"),0,1);
+				}else{
+					$pdf->write(30, $pdf->Image($key[1], $pdf->GetX(), $pdf->GetY(), 30, 30,'png'), 0, 0, 'R');
+					$pdf->Ln(30);
+				}
+
+			}
+		}
+		$pdf->Output("F",UPLOAD_DIR.$nombre.".pdf");
+		echo json_encode("http://regorodri.noip.me/proyecto/librerias/php/".UPLOAD_DIR.$nombre.".pdf");
+	}
+	
+/*	$html=$_POST['pdf'];
+	@file_put_contents("texto.txt", $html);
+	$name=str_replace(" ","+",$_POST['nombre']);
+	$nombre = $name;
+	//if(file_exists(UPLOAD_DIR.$nombre.".pdf")){
+//		echo json_encode("http://regorodri.noip.me/proyecto/librerias/php/".UPLOAD_DIR.$nombre.".pdf");
+	//}else{
+
+
+	    # Instanciamos un objeto de la clase DOMPDF.
+	$options = new Options();
+	$options->setIsRemoteEnabled(true);
+
+	$mipdf =  new Dompdf($options);
+
+	    # Definimos el tamaño y orientación del papel que queremos.
+	    # O por defecto cogerá el que está en el fichero de configuración.
+	$mipdf ->setPaper("A4", "portrait");
+
+	    # Cargamos el contenido HTML.
+	$mipdf ->loadHtml(utf8_decode($html));
+
+	    # Renderizamos el documento PDF.
+	$mipdf ->render();
+
+	    # Enviamos el fichero PDF al navegador.
+		//$mipdf ->stream("Claustro.pdf");
+	$pdf=$mipdf->output();
+	@file_put_contents(UPLOAD_DIR.$nombre.".pdf", $pdf);
+	echo json_encode("http://regorodri.noip.me/proyecto/librerias/php/".UPLOAD_DIR.$nombre.".pdf");
+	*/
 }
 ?>
