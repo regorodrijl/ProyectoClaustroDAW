@@ -447,10 +447,15 @@ $result = $ldap->getProfes();
         success: function(pdf) {
           $('div#contenidoAjax').hide();
           console.log("url->",pdf);
-          window.open(pdf, '_blank');
+
+          a = document.createElement("a");
+          a.download = "Claustro"+name+".pdf";
+          a.href = pdf;
+          a.click();
+          
+          //window.open(pdf, '_blank');
         }
       });
-
 
     });//fin imprimir
   });

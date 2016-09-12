@@ -96,12 +96,6 @@ if(!empty($_POST['claustro'])){
 					$filas=$stmt->fetch(PDO::FETCH_ASSOC);
 					if($filas){
 						array_push($arrayIdProfes,array("id"=>$filas['id']));	
-					}else{
-						$arry=$stmt->errorInfo();
-						$errorCode=$stmt->errorCode();
-						print_r(" error Varios Profes---> ".$arry);
-						print_r($arry);
-						print_r($errorCode);
 					}
 				}
 				$insertado=false;
@@ -339,45 +333,80 @@ if(!empty($_POST['pdf'])){
 
 	if(file_exists(UPLOAD_DIR.$nombre.".pdf")){
 		echo json_encode("http://regorodri.noip.me/proyecto/librerias/php/".UPLOAD_DIR.$nombre.".pdf");
-	}else{
-
-		class PDF extends FPDF{
-			public function Header(){
-				$this->Image('../../src/logo.png',10,8,33);
-				$this->SetFont('Arial','B',15);
-				$this->Cell(80);
-				$this->Cell(30,10,'IES San Clemente',0,0,'C');
-				$this->Ln(40);
-			}
-		}
-
+	}else{ 
 		// Creación del objeto de la clase heredada
-		$pdf = new PDF();
+		$pdf = new FPDF();
 		$pdf->AddPage();
-		$pdf->SetFont('Times','',12);
+		$pdf->Image('../../src/logo.png',10,8,33);
+		$pdf->SetFont('Arial','B',15);
+		$pdf->Cell(80);
+		$pdf->Cell(30,10,'IES San Clemente',0,1,'C');
+		$pdf->Ln(10);
+		$pdf->SetXY(75, 20);
+		$pdf->cell(30,10,utf8_decode('Título: '.$html["title"]));
+		$pdf->Ln(40);
 
-		$pdf->Cell(0,10,utf8_decode('Título: '.$html["title"]),0,1);
-		$pdf->Cell(0,10,utf8_decode('Fecha realización del Claustro: '.$html["date"]),0,1);
-		$pdf->Cell(0,10,'Curso: '.$html["curso"],0,1);
-		$pdf->Cell(0,10,'Hora Inicio: '.$html["hi"],0,1);
-		$pdf->Cell(0,10,'Hora Fin: '.$html["hf"],0,1);
-		$pdf->Cell(0,10,utf8_decode('Orden del día: '.$html["or"]),0,1);
-		$pdf->Cell(0,10,utf8_decode('Observaciones: '.$html["ob"]),0,1);
+		$pdf->SetFont('Times','B',12);
+		//$pdf->Cell(0,10,utf8_decode('Título: '.$html["title"]),0,1);
+		$pdf->Write(5,utf8_decode('Fecha realización del Claustro: '));
+		$pdf->SetFont('Times','',12);
+		$pdf->write(5,$html["date"]);
+		$pdf->Ln(10);
+
+		$pdf->SetFont('Times','B',12);
+		$pdf->Write(5,utf8_decode('Curso: '));
+		$pdf->SetFont('Times','',12);
+		$pdf->write(5,utf8_decode($html["curso"]));
+		$pdf->Ln(10);
+
+		$pdf->SetFont('Times','B',12);
+		$pdf->Write(5,utf8_decode('Hora Inicio:  '));
+		$pdf->SetFont('Times','',12);
+		$pdf->write(5,utf8_decode($html["hi"]));
+		$pdf->Ln(10);
+
+		$pdf->SetFont('Times','B',12);
+		$pdf->Write(5,utf8_decode('Hora Fin:  '));
+		$pdf->SetFont('Times','',12);
+		$pdf->write(5,utf8_decode($html["hf"]));
+		$pdf->Ln(10);
+
+		$pdf->SetFont('Times','B',12);
+		$pdf->Write(5,utf8_decode('Orden del día:  '));
+		$pdf->SetFont('Times','',12);
+		$pdf->write(5,utf8_decode($html["or"]));
+		$pdf->Ln(10);
+
+		$pdf->SetFont('Times','B',12);
+		$pdf->Write(5,utf8_decode('Observaciones:  '));
+		$pdf->SetFont('Times','',12);
+		if(empty($html["ob"])){
+			$pdf->write(5,utf8_decode("Sin Observaciones."));
+		}else{
+			$pdf->write(5,utf8_decode($html["ob"]));
+		}
+		$pdf->Ln(10);
+
 		if(count($html["firmas"])>1){
-			$pdf->Cell(0,10,'Asistecias: ',0,1);
+			$pdf->SetFont('Times','B',12);
+			$pdf->Cell(0,10,'Asistencias: ',0,1);
+			$pdf->SetFont('Times','',12);
 
 			foreach ($html["firmas"] as $key ) {
 
 				//crear la imagen FIRMAS y luego borrarla
-				$pdf->Cell(0,10,utf8_decode($key[0]),0,1);
-
-
+				//$pdf->Cell(0,10,utf8_decode($key[0]),0,1);
 				if(empty($key[1])){
 				//echo json_encode($key[1]."\n");
-					$pdf->Cell(0,10,utf8_decode("No firmó"),0,1);
+					$pdf->Cell(95,10,utf8_decode($key[0]),0,0,"C");
+					$pdf->Cell(95,10,utf8_decode("Sin firma"),0,1,"C");
+
 				}else{
-					$pdf->write(30, $pdf->Image($key[1], $pdf->GetX(), $pdf->GetY(), 30, 30,'png'), 0, 0, 'R');
-					$pdf->Ln(30);
+					$pdf->Cell(95,10,utf8_decode($key[0]),0,0,"C");
+					//$pdf->Cell(95,25,$pdf->Image($key[1], $pdf->GetX(), $pdf->GetY(), 30, 30,'png'),1,1,"C");
+
+					$pdf->write(30, $pdf->Image($key[1], $pdf->GetX()+32, $pdf->GetY(), 30, 30,'png'), 0, 0,"C");
+					$pdf->Ln(25);
 				}
 
 			}
@@ -385,7 +414,7 @@ if(!empty($_POST['pdf'])){
 		$pdf->Output("F",UPLOAD_DIR.$nombre.".pdf");
 		echo json_encode("http://regorodri.noip.me/proyecto/librerias/php/".UPLOAD_DIR.$nombre.".pdf");
 	}
-	
+
 /*	$html=$_POST['pdf'];
 	@file_put_contents("texto.txt", $html);
 	$name=str_replace(" ","+",$_POST['nombre']);
