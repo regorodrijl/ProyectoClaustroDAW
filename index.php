@@ -161,8 +161,10 @@ $result = $ldap->getProfes();
     $("#editar").hide();
     $("#borrar").hide();
     $("#guardar").hide();
+    //$('div#contenidoAjax').hide();
     var crear=false;
     var claustroActivo=false;
+
     // Actualizar profes.
     var datosProfesActualizar =  '<?php echo json_encode($result); ?>';
     datosProfesActualizar=JSON.parse(datosProfesActualizar);
@@ -195,6 +197,7 @@ $result = $ldap->getProfes();
     }).fail( function(error) {
       console.log(error); 
     });// fin Botón Atualizar Profes
+
     // desactivar claustro activos.
     $.ajax({
       url: "./librerias/php/funciones.php",
@@ -452,7 +455,7 @@ $result = $ldap->getProfes();
           a.download = "Claustro"+name+".pdf";
           a.href = pdf;
           a.click();
-          
+
           //window.open(pdf, '_blank');
         }
       });

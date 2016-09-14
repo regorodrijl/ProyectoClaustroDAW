@@ -3,13 +3,10 @@ error_reporting(E_ALL);
 set_time_limit(0);
 ini_set('display_errors', 'On');
 require_once("./conexion.php");
-require 'vendor/autoload.php';
 require 'fpdf181/fpdf.php';
 define('UPLOAD_DIR', 'PDFs/');
 use Dompdf\Dompdf;
 use Dompdf\Options;
-
-
 
 $pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
 
@@ -330,7 +327,7 @@ if(!empty($_POST['pdf'])){
 	$nombre = $name;
 
 	$html=$_POST['pdf'];
-
+	
 	if(file_exists(UPLOAD_DIR.$nombre.".pdf")){
 		echo json_encode("http://regorodri.noip.me/proyecto/librerias/php/".UPLOAD_DIR.$nombre.".pdf");
 	}else{ 
@@ -342,48 +339,52 @@ if(!empty($_POST['pdf'])){
 		$pdf->Cell(80);
 		$pdf->Cell(30,10,'IES San Clemente',0,1,'C');
 		$pdf->Ln(10);
-		$pdf->SetXY(75, 20);
-		$pdf->cell(30,10,utf8_decode('Título: '.$html["title"]));
+		$pdf->SetXY(80, 20);
+		$pdf->cell(30,10,utf8_decode($html["title"]));
 		$pdf->Ln(40);
 
 		$pdf->SetFont('Times','B',12);
 		//$pdf->Cell(0,10,utf8_decode('Título: '.$html["title"]),0,1);
-		$pdf->Write(5,utf8_decode('Fecha realización del Claustro: '));
+		$pdf->Cell(80,10,utf8_decode('Fecha realización del Claustro: '),0,0);
+		//$pdf->Write(5,utf8_decode('Fecha realización del Claustro: '));
 		$pdf->SetFont('Times','',12);
-		$pdf->write(5,$html["date"]);
-		$pdf->Ln(10);
+		$pdf->Cell(80,10,$html["date"],0,1);
+		//$pdf->write(5,$html["date"]);
 
 		$pdf->SetFont('Times','B',12);
-		$pdf->Write(5,utf8_decode('Curso: '));
+		$pdf->Cell(80,10,utf8_decode('Curso: '),0,0);
+		//$pdf->Write(5,utf8_decode('Curso: '));
 		$pdf->SetFont('Times','',12);
-		$pdf->write(5,utf8_decode($html["curso"]));
-		$pdf->Ln(10);
+		$pdf->Cell(80,10,utf8_decode($html["curso"]),0,1);
+		//$pdf->write(5,utf8_decode($html["curso"]));
 
 		$pdf->SetFont('Times','B',12);
-		$pdf->Write(5,utf8_decode('Hora Inicio:  '));
+		$pdf->Cell(80,10,utf8_decode('Hora Inicio:  '),0,0);
+		//$pdf->Write(5,utf8_decode('Hora Inicio:  '));
 		$pdf->SetFont('Times','',12);
-		$pdf->write(5,utf8_decode($html["hi"]));
-		$pdf->Ln(10);
+		$pdf->Cell(80,10,utf8_decode($html["hi"]),0,1);
+		//$pdf->write(5,utf8_decode($html["hi"]));
+
 
 		$pdf->SetFont('Times','B',12);
-		$pdf->Write(5,utf8_decode('Hora Fin:  '));
+		$pdf->Cell(80,10,utf8_decode('Hora Fin:  '),0,0);
 		$pdf->SetFont('Times','',12);
-		$pdf->write(5,utf8_decode($html["hf"]));
-		$pdf->Ln(10);
+		$pdf->Cell(80,10,utf8_decode($html["hf"]),0,1);
 
 		$pdf->SetFont('Times','B',12);
-		$pdf->Write(5,utf8_decode('Orden del día:  '));
+		$pdf->Cell(80,10,utf8_decode('Orden del día:  '),0,0);
+
 		$pdf->SetFont('Times','',12);
-		$pdf->write(5,utf8_decode($html["or"]));
-		$pdf->Ln(10);
+		$pdf->Cell(80,10,utf8_decode($html["or"]),0,1);
 
 		$pdf->SetFont('Times','B',12);
-		$pdf->Write(5,utf8_decode('Observaciones:  '));
+		$pdf->Cell(80,10,utf8_decode('Observaciones:  '),0,0);
+		
 		$pdf->SetFont('Times','',12);
 		if(empty($html["ob"])){
-			$pdf->write(5,utf8_decode("Sin Observaciones."));
+			$pdf->Cell(80,10,utf8_decode("Sin Observaciones."),0,1);
 		}else{
-			$pdf->write(5,utf8_decode($html["ob"]));
+			$pdf->Cell(80,10,utf8_decode($html["ob"]),0,1);
 		}
 		$pdf->Ln(10);
 
@@ -398,15 +399,15 @@ if(!empty($_POST['pdf'])){
 				//$pdf->Cell(0,10,utf8_decode($key[0]),0,1);
 				if(empty($key[1])){
 				//echo json_encode($key[1]."\n");
-					$pdf->Cell(95,10,utf8_decode($key[0]),0,0,"C");
-					$pdf->Cell(95,10,utf8_decode("Sin firma"),0,1,"C");
+					$pdf->Cell(95,15,utf8_decode($key[0]),1,0,"C");
+					$pdf->Cell(95,15,utf8_decode("Sin firma"),1,1,"C");
 
 				}else{
-					$pdf->Cell(95,10,utf8_decode($key[0]),0,0,"C");
-					//$pdf->Cell(95,25,$pdf->Image($key[1], $pdf->GetX(), $pdf->GetY(), 30, 30,'png'),1,1,"C");
+					$pdf->Cell(95,15,utf8_decode($key[0]),1,0,"C");
+					$pdf->Cell(95,15, $pdf->Image($key[1], $pdf->GetX()+32, $pdf->GetY(), 15, 15,'png'), 1, 1,"C");
 
-					$pdf->write(30, $pdf->Image($key[1], $pdf->GetX()+32, $pdf->GetY(), 30, 30,'png'), 0, 0,"C");
-					$pdf->Ln(25);
+					//$pdf->write(15, $pdf->Image($key[1], $pdf->GetX()+32, $pdf->GetY(), 15, 15,'png'), 1, 1,"C");
+					//$pdf->Ln(15);
 				}
 
 			}
@@ -414,37 +415,5 @@ if(!empty($_POST['pdf'])){
 		$pdf->Output("F",UPLOAD_DIR.$nombre.".pdf");
 		echo json_encode("http://regorodri.noip.me/proyecto/librerias/php/".UPLOAD_DIR.$nombre.".pdf");
 	}
-
-/*	$html=$_POST['pdf'];
-	@file_put_contents("texto.txt", $html);
-	$name=str_replace(" ","+",$_POST['nombre']);
-	$nombre = $name;
-	//if(file_exists(UPLOAD_DIR.$nombre.".pdf")){
-//		echo json_encode("http://regorodri.noip.me/proyecto/librerias/php/".UPLOAD_DIR.$nombre.".pdf");
-	//}else{
-
-
-	    # Instanciamos un objeto de la clase DOMPDF.
-	$options = new Options();
-	$options->setIsRemoteEnabled(true);
-
-	$mipdf =  new Dompdf($options);
-
-	    # Definimos el tamaño y orientación del papel que queremos.
-	    # O por defecto cogerá el que está en el fichero de configuración.
-	$mipdf ->setPaper("A4", "portrait");
-
-	    # Cargamos el contenido HTML.
-	$mipdf ->loadHtml(utf8_decode($html));
-
-	    # Renderizamos el documento PDF.
-	$mipdf ->render();
-
-	    # Enviamos el fichero PDF al navegador.
-		//$mipdf ->stream("Claustro.pdf");
-	$pdf=$mipdf->output();
-	@file_put_contents(UPLOAD_DIR.$nombre.".pdf", $pdf);
-	echo json_encode("http://regorodri.noip.me/proyecto/librerias/php/".UPLOAD_DIR.$nombre.".pdf");
-	*/
 }
 ?>
