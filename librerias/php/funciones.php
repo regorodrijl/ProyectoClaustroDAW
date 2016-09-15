@@ -2,8 +2,9 @@
 error_reporting(E_ALL);
 set_time_limit(0);
 ini_set('display_errors', 'On');
+require_once("../ldap/class.ldap.php");
 require_once("./conexion.php");
-require 'fpdf181/fpdf.php';
+require_once 'fpdf181/fpdf.php';
 define('UPLOAD_DIR', 'PDFs/');
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -13,7 +14,11 @@ $pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
 if (!empty($_POST['datos'])){
 	//print_r(json_decode($_POST['datos']));
 	try{	
-		$result = $_POST['datos'];
+		$ldap = new ldap(Config::$ldapServidor);
+		//print_r($ldap->getProfes());
+		$result = $ldap->getProfes();
+
+		//$result = $_POST['datos'];
 		$todoBien=false;
 		foreach ($result as  $key) {
 			$patron="/[P|p]rofe\s-(\s[0-9]*)?/";
@@ -308,7 +313,7 @@ if(!empty($_POST['fecha'])){
 if(!empty($_POST['rellenar'])){
 	try{
 		$arrayD=[];
-		$stmt=$pdo->prepare("select * from profesor");
+		$stmt=$pdo->prepare("select * from profesor order by nombre");
 		$stmt->execute();
 		$filas=$stmt->fetchAll(PDO::FETCH_ASSOC);
 		if($filas){
@@ -328,9 +333,9 @@ if(!empty($_POST['pdf'])){
 
 	$html=$_POST['pdf'];
 	
-	if(file_exists(UPLOAD_DIR.$nombre.".pdf")){
+	/*if(file_exists(UPLOAD_DIR.$nombre.".pdf")){
 		echo json_encode("http://regorodri.noip.me/proyecto/librerias/php/".UPLOAD_DIR.$nombre.".pdf");
-	}else{ 
+	}else{ */
 		// Creación del objeto de la clase heredada
 		$pdf = new FPDF();
 		$pdf->AddPage();
@@ -400,8 +405,9 @@ if(!empty($_POST['pdf'])){
 				if(empty($key[1])){
 				//echo json_encode($key[1]."\n");
 					$pdf->Cell(95,15,utf8_decode($key[0]),1,0,"C");
-					$pdf->Cell(95,15,utf8_decode("Sin firma"),1,1,"C");
-
+					$pdf->SetTextColor(255,0,0);
+					$pdf->Cell(95,15,utf8_decode("Falta de asistencia"),1,1,"C");
+					$pdf->SetTextColor(0,0,0);
 				}else{
 					$pdf->Cell(95,15,utf8_decode($key[0]),1,0,"C");
 					$pdf->Cell(95,15, $pdf->Image($key[1], $pdf->GetX()+32, $pdf->GetY(), 15, 15,'png'), 1, 1,"C");
@@ -414,6 +420,6 @@ if(!empty($_POST['pdf'])){
 		}
 		$pdf->Output("F",UPLOAD_DIR.$nombre.".pdf");
 		echo json_encode("http://regorodri.noip.me/proyecto/librerias/php/".UPLOAD_DIR.$nombre.".pdf");
+	//}
 	}
-}
-?>
+	?>

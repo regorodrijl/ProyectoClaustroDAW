@@ -35,7 +35,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
 				$stmtFirma->bindParam(':idClaustro', $idClaustro);
 				$stmtFirma->bindParam(':idProfesor', $idProfesor);
 				if($stmtFirma->execute()){
-					echo json_encode('Firma Guardada, nombre del profesor: '. $nombre);
+					echo json_encode('Firma guardada correctamente.');
 				}else {
 					echo json_encode(array('status' => 'ko', 'msg' => 'Error al guardar!'));
 				}

@@ -1,10 +1,5 @@
 <?php 
 error_reporting(E_ALL);
-require("./librerias/ldap/class.ldap.php");
-
-$ldap = new ldap(Config::$ldapServidor);
-//print_r($ldap->getProfes());
-$result = $ldap->getProfes();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -166,8 +161,8 @@ $result = $ldap->getProfes();
     var claustroActivo=false;
 
     // Actualizar profes.
-    var datosProfesActualizar =  '<?php echo json_encode($result); ?>';
-    datosProfesActualizar=JSON.parse(datosProfesActualizar);
+    //var datosProfesActualizar =  '< php echo json_encode($result); ?>';
+    datosProfesActualizar="datos";//JSON.parse(datosProfesActualizar);
     // poner: cargando...
     $.ajax({
       url: "./librerias/php/funciones.php",
